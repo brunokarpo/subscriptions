@@ -2,10 +2,10 @@ package nom.brunokarpo.subscriptions.domains.product
 
 import java.util.UUID
 
-class Product private constructor(val uuid: UUID, val name: String) {
+class Product private constructor(val id: UUID, val name: String) {
 
 	companion object {
-		fun create(uuid: UUID, name: String): Product = Product(uuid, name)
+		fun create(name: String): Product = Product(UUID.randomUUID(), name)
 	}
 
 }
