@@ -2,9 +2,7 @@ package nom.brunokarpo.subscriptions.domain.product
 
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
 
-class Product private constructor(productId: ProductId, val name: String) : AggregateRoot() {
-
-	override val id = productId.id.toString()
+class Product private constructor(override val id: ProductId, val name: String) : AggregateRoot() {
 
 	companion object {
 		fun create(name: String): Product {
@@ -17,7 +15,7 @@ class Product private constructor(productId: ProductId, val name: String) : Aggr
 			return product
 		}
 
-		fun create(uuid: String, name: String): Product = Product(ProductId(uuid), name)
+		fun create(productId: ProductId, name: String): Product = Product(id = productId, name =  name)
 	}
 
 }

@@ -4,7 +4,7 @@ import java.time.ZonedDateTime
 
 interface DomainEvent {
 
-	val domainId: String
+	val domainId: Identifier<*>
 	val occurredOn: ZonedDateTime
 
 }
