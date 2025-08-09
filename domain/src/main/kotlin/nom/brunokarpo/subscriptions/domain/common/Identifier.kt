@@ -20,4 +20,8 @@ abstract class Identifier<out T>(
 	override fun hashCode(): Int {
 		return id?.hashCode() ?: 0
 	}
+
+	override fun toString(): String {
+		return id.toString()
+	}
 }

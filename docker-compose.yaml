@@ -1,0 +1,23 @@
+services:
+  database:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: subscriptions-db
+      POSTGRES_USER: subscriptions-app
+      POSTGRES_PASSWORD: subscriptions-app
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: "pg_isready -q -U subscriptions-app"
+      interval: 5s
+      timeout: 1s
+      retries: 3
+
+  flyway:
+    image: flyway/flyway:11.10.4-alpine
+    command: ["-url=jdbc:postgresql://database:5432/subscriptions-db", "-user=subscriptions-app", "-password=subscriptions-app", "-schemas=public", "-postgresql.transactional.lock=false", "migrate"]
+    volumes:
+      - ./infra/scripts/db/migrations:/flyway/sql
+    depends_on:
+      database:
+        condition: service_healthy
