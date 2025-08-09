@@ -16,6 +16,6 @@ class ProductDatabaseRepository(
 	}
 
 	override fun findByName(name: String): Product? {
-		return productJpaRepository.findByName(name)?.toDomain()
+		return productJpaRepository.findByNameIgnoreCase(name)?.toDomain()
 	}
 }

@@ -6,5 +6,5 @@ import java.util.UUID
 
 interface ProductJpaRepository : CrudRepository<ProductEntity, UUID> {
 
-	fun findByName(name: String): ProductEntity?
+	fun findByNameIgnoreCase(name: String): ProductEntity?
 }
