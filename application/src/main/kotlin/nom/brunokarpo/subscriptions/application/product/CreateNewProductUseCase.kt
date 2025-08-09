@@ -2,8 +2,8 @@ package nom.brunokarpo.subscriptions.application.product
 
 import nom.brunokarpo.subscriptions.application.product.exceptions.ProductUniqueNameException
 import nom.brunokarpo.subscriptions.application.usecases.UseCase
-import nom.brunokarpo.subscriptions.domains.product.Product
-import nom.brunokarpo.subscriptions.domains.product.ProductRepository
+import nom.brunokarpo.subscriptions.domain.product.Product
+import nom.brunokarpo.subscriptions.domain.product.ProductRepository
 import kotlin.jvm.Throws
 
 class CreateNewProductUseCase(

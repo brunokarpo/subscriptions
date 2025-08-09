@@ -5,8 +5,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import nom.brunokarpo.subscriptions.application.product.exceptions.ProductUniqueNameException
-import nom.brunokarpo.subscriptions.domains.product.Product
-import nom.brunokarpo.subscriptions.domains.product.ProductRepository
+import nom.brunokarpo.subscriptions.domain.product.Product
+import nom.brunokarpo.subscriptions.domain.product.ProductId
+import nom.brunokarpo.subscriptions.domain.product.ProductRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -61,7 +62,7 @@ class CreateNewProductUseCaseTest {
 
 		every {
 			productRepository.findByName(productName)
-		} returns Product.create(UUID.randomUUID(), productName)
+		} returns Product.create(productName)
 
 		// when
 		val exception = assertThrows<ProductUniqueNameException> {

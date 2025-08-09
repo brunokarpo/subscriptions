@@ -1,4 +1,4 @@
-package nom.brunokarpo.subscriptions.domains.product
+package nom.brunokarpo.subscriptions.domain.product
 
 interface ProductRepository {
 
