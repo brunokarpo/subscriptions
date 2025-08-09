@@ -2,7 +2,7 @@ package nom.brunokarpo.subscriptions.domain.product
 
 interface ProductRepository {
 
-	fun save(product: Product)
+	suspend fun save(product: Product)
 
-	fun findByName(name: String): Product?
+	suspend fun findByName(name: String): Product?
 }

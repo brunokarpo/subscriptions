@@ -11,11 +11,11 @@ class ProductDatabaseRepository(
 	private val productJpaRepository: ProductJpaRepository
 ) : ProductRepository {
 
-	override fun save(product: Product) {
+	override suspend fun save(product: Product) {
 		productJpaRepository.save(ProductEntity.from(product))
 	}
 
-	override fun findByName(name: String): Product? {
+	override suspend fun findByName(name: String): Product? {
 		return productJpaRepository.findByNameIgnoreCase(name)?.toDomain()
 	}
 }

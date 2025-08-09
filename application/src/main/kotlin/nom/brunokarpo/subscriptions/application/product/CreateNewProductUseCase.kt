@@ -11,7 +11,7 @@ class CreateNewProductUseCase(
 ) : UseCase<CreateNewProductUseCase.Input, CreateNewProductUseCase.Output> {
 
 	@Throws(ProductUniqueNameException::class)
-	override fun execute(input: Input): Output {
+	override suspend fun execute(input: Input): Output {
 		productRepository.findByName(input.name)?.let {
 			throw ProductUniqueNameException(input.name)
 		}

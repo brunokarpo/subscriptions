@@ -1,5 +1,6 @@
 package nom.brunokarpo.subscriptions.infra.database.repositories
 
+import kotlinx.coroutines.test.runTest
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductRepository
 import nom.brunokarpo.subscriptions.infra.database.DatabaseConfigurationTest
@@ -16,7 +17,7 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 	private lateinit var sut: ProductRepository
 
 	@Test
-	fun `should save new created product`() {
+	fun `should save new created product`() = runTest {
 		// given
 		val name = "Product 1"
 
@@ -33,7 +34,7 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 
 	@Test
 	@Sql(scripts = ["/create_products.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-	fun `should find product by name`() {
+	fun `should find product by name`() = runTest {
 		val name = "database product"
 
 		val product = sut.findByName(name)
@@ -44,7 +45,7 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	fun `should return null when product name does not exists`() {
+	fun `should return null when product name does not exists`() = runTest {
 		val name = "unknown product"
 
 		val product = sut.findByName(name)
@@ -54,7 +55,7 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 
 	@Test
 	@Sql(scripts = ["/create_products.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-	fun `should find product by name even when case does not match exactly`() {
+	fun `should find product by name even when case does not match exactly`() = runTest {
 		val name = "DATABASE PRODUCT"
 
 		val product = sut.findByName(name)
