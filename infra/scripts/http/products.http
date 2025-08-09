@@ -1,0 +1,8 @@
+###
+POST http://localhost:8080/v1/products
+Content-Type: application/json
+
+{
+  "name": "{{$random.commerce.productName}}"
+}
+###
