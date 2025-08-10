@@ -65,6 +65,30 @@ class CustomerTest {
 	}
 
 	@Test
+	fun `should not allow product subscription if customer is disabled`() {
+		// given
+		val customerId = CustomerId.unique()
+		val expectedName = "Test"
+		val expectedEmail = "<EMAIL>"
+
+		val customer = Customer.create(id = customerId, name = expectedName, email = expectedEmail)
+
+		val productId = ProductId.unique()
+		val expectedProductName = "Product 1"
+		val product = Product.create(productId = productId, name = expectedProductName)
+
+		// when
+		val exception = assertThrows<CustomerNotActiveException> {
+			customer.subscribe(product)
+		}
+
+		// then
+		assertEquals("Customer with id: $customerId is not active!", exception.message)
+		assertTrue(customer.domainEvents().isEmpty())
+		assertThrows<CustomerNotActiveException> { customer.activationKey()}
+	}
+
+	@Test
 	fun `should not generate activation key if customer is not active`() {
 		// given
 		val customerId = CustomerId.unique()

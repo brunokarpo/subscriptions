@@ -34,6 +34,9 @@ class Customer(
 	}
 
 	fun subscribe(product: Product) {
+		if (!this.active) {
+			throw CustomerNotActiveException(customerId = this.id)
+		}
 		subscriptions.add(product)
 		this.recordEvent(ProductSubscribed(domainId = this.id, productId = product.id))
 	}
