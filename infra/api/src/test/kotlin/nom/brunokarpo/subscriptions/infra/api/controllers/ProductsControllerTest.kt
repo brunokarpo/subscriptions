@@ -5,16 +5,11 @@ import kotlinx.coroutines.test.runTest
 import nom.brunokarpo.subscriptions.application.product.CreateNewProductUseCase
 import nom.brunokarpo.subscriptions.application.product.exceptions.ProductUniqueNameException
 import nom.brunokarpo.subscriptions.infra.api.ApiConfigurationTest
-import nom.brunokarpo.subscriptions.infra.api.dtos.CreateProductDtoRequest
+import nom.brunokarpo.subscriptions.infra.api.dtos.CreateProductDto
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
-import org.springframework.test.web.reactive.server.WebTestClient
 
 class ProductsControllerTest: ApiConfigurationTest() {
-
-	@Autowired
-	private lateinit var client: WebTestClient
 
 	@Test
 	fun `should create product by name`() = runTest {
@@ -23,7 +18,7 @@ class ProductsControllerTest: ApiConfigurationTest() {
 
 		coEvery { createProductUseCase.execute(any()) } returns CreateNewProductUseCase.Output(id = expectedId, name = expectedProductName)
 
-		val productDto = CreateProductDtoRequest(name = expectedProductName)
+		val productDto = CreateProductDto(name = expectedProductName)
 
 		client.post()
 			.uri("/v1/products")
@@ -43,7 +38,7 @@ class ProductsControllerTest: ApiConfigurationTest() {
 
 		coEvery { createProductUseCase.execute(any()) } throws ProductUniqueNameException(expectedProductName)
 
-		val productDto = CreateProductDtoRequest(name = expectedProductName)
+		val productDto = CreateProductDto(name = expectedProductName)
 
 		client.post()
 			.uri("/v1/products")
