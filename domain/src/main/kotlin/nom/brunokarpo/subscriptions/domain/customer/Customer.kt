@@ -3,6 +3,7 @@ package nom.brunokarpo.subscriptions.domain.customer
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
+import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscriptions
 import nom.brunokarpo.subscriptions.domain.product.Product
@@ -34,6 +35,7 @@ class Customer(
 
 	fun subscribe(product: Product) {
 		subscriptions.add(product)
+		this.recordEvent(ProductSubscribed(domainId = this.id, productId = product.id))
 	}
 
 	fun activate() {

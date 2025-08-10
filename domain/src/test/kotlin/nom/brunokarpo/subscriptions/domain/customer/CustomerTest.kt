@@ -2,6 +2,7 @@ package nom.brunokarpo.subscriptions.domain.customer
 
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
+import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
@@ -55,6 +56,12 @@ class CustomerTest {
 		assertEquals(expectedEmail, activationKey.email)
 		assertContains(activationKey.products, expectedProductName)
 		assertEquals(1, activationKey.products.size)
+
+		val event = customer.domainEvents().firstOrNull{ ev -> ev is ProductSubscribed } as ProductSubscribed
+		assertNotNull(event)
+		assertEquals(customerId, event.domainId)
+		assertNotNull(event.occurredOn)
+		assertEquals(productId, event.productId)
 	}
 
 	@Test
