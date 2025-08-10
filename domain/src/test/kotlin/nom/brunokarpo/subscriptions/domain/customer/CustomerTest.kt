@@ -2,10 +2,12 @@ package nom.brunokarpo.subscriptions.domain.customer
 
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
+import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.ZonedDateTime
 import kotlin.test.assertContains
 
@@ -38,6 +40,7 @@ class CustomerTest {
 		val expectedEmail = "<EMAIL>"
 
 		val customer = Customer.create(id = customerId, name = expectedName, email = expectedEmail)
+		customer.activate()
 
 		val productId = ProductId.unique()
 		val expectedProductName = "Product 1"
@@ -55,6 +58,23 @@ class CustomerTest {
 	}
 
 	@Test
+	fun `should not generate activation key if customer is not active`() {
+		// given
+		val customerId = CustomerId.unique()
+		val expectedName = "Test"
+		val expectedEmail = "<EMAIL>"
+
+		val customer = Customer.create(id = customerId, name = expectedName, email = expectedEmail)
+
+		// when
+		val exception = assertThrows<CustomerNotActiveException> {
+			customer.activationKey()
+		}
+
+		assertEquals("Customer with id: $customerId is not active!", exception.message)
+	}
+
+	@Test
 	fun `should create customer and generate the validation of 30 days to activation key`() {
 		// given
 		val customerId = CustomerId.unique()
@@ -63,11 +83,14 @@ class CustomerTest {
 
 		val customer = Customer.create(id = customerId, name = expectedName, email = expectedEmail)
 
+		// when
 		customer.activate()
 
+		// then
 		val activationKey = customer.activationKey()
-		// ativo por 40 dias
-		assertTrue(activationKey.validUntil.isBefore(ZonedDateTime.now().plusDays(30).minusHours(1)))
+
+		val expectedMinimumValidation = ZonedDateTime.now().plusDays(30).minusHours(1)
+		assertTrue(activationKey.validUntil.isAfter(expectedMinimumValidation))
 
 		val event = customer.domainEvents().firstOrNull{ ev -> ev is CustomerActivated } as CustomerActivated
 		assertNotNull(event)
