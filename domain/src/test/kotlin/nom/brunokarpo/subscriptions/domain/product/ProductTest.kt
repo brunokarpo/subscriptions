@@ -1,5 +1,6 @@
 package nom.brunokarpo.subscriptions.domain.product
 
+import nom.brunokarpo.subscriptions.domain.product.events.ProductCreated
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

@@ -1,0 +1,10 @@
+###
+POST http://localhost:8080/v1/customers
+Content-Type: application/json
+
+{
+  "name": "{{$random.name.name}}",
+  "email": "{{$random.email}}"
+}
+
+###

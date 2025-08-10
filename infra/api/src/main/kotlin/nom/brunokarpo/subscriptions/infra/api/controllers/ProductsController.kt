@@ -2,7 +2,7 @@ package nom.brunokarpo.subscriptions.infra.api.controllers
 
 import nom.brunokarpo.subscriptions.application.product.CreateNewProductUseCase
 import nom.brunokarpo.subscriptions.application.product.exceptions.ProductUniqueNameException
-import nom.brunokarpo.subscriptions.infra.api.dtos.CreateProductDtoRequest
+import nom.brunokarpo.subscriptions.infra.api.dtos.CreateProductDto
 import nom.brunokarpo.subscriptions.infra.api.dtos.ProductDtoResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -19,9 +19,9 @@ class ProductsController(
 ) {
 
 	@PostMapping
-	suspend fun createProduct(@RequestBody createProductDtoRequest: CreateProductDtoRequest): ResponseEntity<ProductDtoResponse> {
+	suspend fun createProduct(@RequestBody createProductDto: CreateProductDto): ResponseEntity<ProductDtoResponse> {
 		val input = CreateNewProductUseCase.Input(
-			name = createProductDtoRequest.name
+			name = createProductDto.name
 		)
 
 		val output = createProductUseCase.execute(input)
