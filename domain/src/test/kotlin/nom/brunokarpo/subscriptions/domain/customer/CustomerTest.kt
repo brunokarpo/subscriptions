@@ -102,6 +102,7 @@ class CustomerTest {
 			customer.activationKey()
 		}
 
+		// then
 		assertEquals("Customer with id: $customerId is not active!", exception.message)
 	}
 
@@ -120,6 +121,7 @@ class CustomerTest {
 		// then
 		val activationKey = customer.activationKey()
 
+		// then
 		val expectedMinimumValidation = ZonedDateTime.now().plusDays(30).minusHours(1)
 		assertTrue(activationKey.validUntil.isAfter(expectedMinimumValidation))
 
