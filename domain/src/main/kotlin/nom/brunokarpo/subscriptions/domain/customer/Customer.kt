@@ -1,13 +1,21 @@
 package nom.brunokarpo.subscriptions.domain.customer
 
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
+import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscriptions
+import nom.brunokarpo.subscriptions.domain.product.Product
+import java.time.ZonedDateTime
 
 class Customer(
 	override val id: CustomerId,
 	val name: String,
 	val email: String
 ) : AggregateRoot() {
+
+	private val subscriptions: Subscriptions = Subscriptions()
+	private var active = false
+	private var activationDate: ZonedDateTime? = null
 
 	companion object {
 		fun create(id: CustomerId, name: String, email: String): Customer = Customer(
@@ -21,5 +29,23 @@ class Customer(
 			customer.recordEvent(CustomerCreated(customer))
 			return customer
 		}
+	}
+
+	fun subscribe(product: Product) {
+		subscriptions.add(product)
+	}
+
+	fun activate() {
+		this.active = true
+		this.activationDate = ZonedDateTime.now().plusDays(30)
+		this.recordEvent(CustomerActivated(domainId = this.id))
+	}
+
+	fun activationKey(): ActivationKey {
+		return ActivationKey(
+			email = this.email,
+			products = this.subscriptions.productNames(),
+			validUntil = ZonedDateTime.now().plusDays(1)
+		)
 	}
 }

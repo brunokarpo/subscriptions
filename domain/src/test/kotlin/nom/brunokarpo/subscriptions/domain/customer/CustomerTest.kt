@@ -1,8 +1,13 @@
 package nom.brunokarpo.subscriptions.domain.customer
 
+import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
+import nom.brunokarpo.subscriptions.domain.product.Product
+import nom.brunokarpo.subscriptions.domain.product.ProductId
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import java.time.ZonedDateTime
+import kotlin.test.assertContains
 
 class CustomerTest {
 
@@ -23,5 +28,50 @@ class CustomerTest {
 		assertNotNull(event.occurredOn)
 		assertEquals(name, event.name)
 		assertEquals(email, event.email)
+	}
+
+	@Test
+	fun `should subscribe a product and generate an activation key`() {
+		// given
+		val customerId = CustomerId.unique()
+		val expectedName = "Test"
+		val expectedEmail = "<EMAIL>"
+
+		val customer = Customer.create(id = customerId, name = expectedName, email = expectedEmail)
+
+		val productId = ProductId.unique()
+		val expectedProductName = "Product 1"
+		val product = Product.create(productId = productId, name = expectedProductName)
+
+		// when
+		customer.subscribe(product)
+
+		// then
+		val activationKey: ActivationKey = customer.activationKey()
+		assertNotNull(activationKey)
+		assertEquals(expectedEmail, activationKey.email)
+		assertContains(activationKey.products, expectedProductName)
+		assertEquals(1, activationKey.products.size)
+	}
+
+	@Test
+	fun `should create customer and generate the validation of 30 days to activation key`() {
+		// given
+		val customerId = CustomerId.unique()
+		val expectedName = "Test"
+		val expectedEmail = "<EMAIL>"
+
+		val customer = Customer.create(id = customerId, name = expectedName, email = expectedEmail)
+
+		customer.activate()
+
+		val activationKey = customer.activationKey()
+		// ativo por 40 dias
+		assertTrue(activationKey.validUntil.isBefore(ZonedDateTime.now().plusDays(30).minusHours(1)))
+
+		val event = customer.domainEvents().firstOrNull{ ev -> ev is CustomerActivated } as CustomerActivated
+		assertNotNull(event)
+		assertEquals(customerId, event.domainId)
+		assertNotNull(event.occurredOn)
 	}
 }
