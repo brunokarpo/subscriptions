@@ -9,6 +9,7 @@ class ProductId private constructor(
 
 	companion object {
 		fun unique(): ProductId = ProductId(UUID.randomUUID())
+		fun from(id: String): ProductId = from(UUID.fromString(id))
 		fun from(uuid: UUID): ProductId = ProductId(uuid)
 	}
 
