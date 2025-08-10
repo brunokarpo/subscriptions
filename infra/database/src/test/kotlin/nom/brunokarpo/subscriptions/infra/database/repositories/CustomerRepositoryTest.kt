@@ -6,7 +6,9 @@ import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
 import nom.brunokarpo.subscriptions.infra.database.DatabaseConfigurationTest
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
@@ -63,5 +65,29 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 		val customer = sut.findByEmail(email)
 
 		assertEquals(customer, null)
+	}
+
+	@Test
+	@Sql(scripts = ["/create_customers.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+	fun `should update active and active untl of existent customer`() = runTest {
+		// given
+		val expectedEmail = "sara@email.com"
+		val customer = sut.findByEmail(expectedEmail)
+		assertNotNull(customer)
+		assertFalse(customer!!.active)
+		assertEquals(ZonedDateTime.parse("2021-08-31T23:59:59Z"), customer.activeUntil)
+
+		// when
+		customer.activate()
+		sut.save(customer)
+
+		// then
+		val result = sut.findByEmail(expectedEmail)
+		assertNotNull(result)
+		assertEquals(customer.id, result?.id)
+		assertEquals(customer.name, result?.name)
+		assertEquals(customer.email, result?.email)
+		assertTrue(result?.active ?: false)
+		assertTrue(result?.activeUntil!!.isAfter(ZonedDateTime.now()))
 	}
 }
