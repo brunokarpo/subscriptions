@@ -10,6 +10,7 @@ import nom.brunokarpo.subscriptions.application.product.exceptions.ProductUnique
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
+import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
 import nom.brunokarpo.subscriptions.domain.product.ProductRepository
@@ -117,6 +118,32 @@ class SubscribeProductToCustomerUseCaseTest {
 		// then
 		assertNotNull(exception)
 		assertEquals("Product with name '$productName' does not exists!", exception.message)
+	}
 
+	@Test
+	fun `should not subscribe product to a disabled customer`() = runTest {
+		// given
+		val customerEmail = "<EMAIL>"
+		val customerId = CustomerId.unique()
+		val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
+		coEvery { customerRepository.findByEmail(customerEmail) } returns customer
+
+		val productName = "Product Name"
+		val productId = ProductId.unique()
+		val product = Product.create(productId = productId, name = productName)
+		coEvery { productRepository.findByName(productName) } returns product
+
+		// when
+		val input = SubscribeProductToCustomerUseCase.Input(
+			customerEmail = customerEmail,
+			productName = productName
+		)
+		val exception = assertThrows<CustomerNotActiveException> {
+			sut.execute(input)
+		}
+
+		// then
+		assertNotNull(exception)
+		assertEquals("Customer with id: $customerId is not active!", exception.message)
 	}
 }
