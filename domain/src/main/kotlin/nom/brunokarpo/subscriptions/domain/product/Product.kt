@@ -1,6 +1,7 @@
 package nom.brunokarpo.subscriptions.domain.product
 
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
+import nom.brunokarpo.subscriptions.domain.product.events.ProductCreated
 
 class Product private constructor(override val id: ProductId, val name: String) : AggregateRoot() {
 

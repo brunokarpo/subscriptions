@@ -1,6 +1,7 @@
 package nom.brunokarpo.subscriptions.domain.customer
 
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
+import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 
 class Customer(
 	override val id: CustomerId,
@@ -15,6 +16,10 @@ class Customer(
 			email = email
 		)
 
-		fun create(name: String, email: String): Customer = create(id = CustomerId.unique(), name = name, email = email)
+		fun create(name: String, email: String): Customer {
+			val customer = create(id = CustomerId.unique(), name = name, email = email)
+			customer.recordEvent(CustomerCreated(customer))
+			return customer
+		}
 	}
 }
