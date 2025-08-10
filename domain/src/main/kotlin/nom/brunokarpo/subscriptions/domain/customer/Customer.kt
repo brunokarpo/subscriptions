@@ -14,5 +14,7 @@ class Customer(
 			name = name,
 			email = email
 		)
+
+		fun create(name: String, email: String): Customer = create(id = CustomerId.unique(), name = name, email = email)
 	}
 }
