@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
+import java.time.ZonedDateTime
 import java.util.UUID
 
 class CustomerRepositoryTest : DatabaseConfigurationTest() {
@@ -42,6 +43,8 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 		val expectedId = UUID.fromString("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
 		val expectedName = "John Doe"
 		val expectedEmail = "john@email.com"
+		val expectedActive = true
+		val expectedEndAt = ZonedDateTime.parse("2021-08-31T23:59:59Z")
 
 		val customer = sut.findByEmail(expectedEmail)
 
@@ -49,6 +52,8 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 		assertEquals(expectedId, customer?.id?.value())
 		assertEquals(expectedName, customer?.name)
 		assertEquals(expectedEmail, customer?.email)
+		assertEquals(expectedActive, customer?.active)
+		assertEquals(expectedEndAt, customer?.activeUntil)
 	}
 
 	@Test

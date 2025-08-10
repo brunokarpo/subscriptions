@@ -1,6 +1,7 @@
 package nom.brunokarpo.subscriptions.domain.customer
 
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
+import nom.brunokarpo.subscriptions.domain.customer.Customer.Companion.create
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
@@ -16,15 +17,27 @@ class Customer(
 ) : AggregateRoot() {
 
 	private val subscriptions: Subscriptions = Subscriptions()
-	private var active = false
-	private var activeUntil: ZonedDateTime? = null
+
+	var active = false
+		private set
+	var activeUntil: ZonedDateTime? = null
+		private set
 
 	companion object {
-		fun create(id: CustomerId, name: String, email: String): Customer = Customer(
+		fun create(
+			id: CustomerId,
+			name: String,
+			email: String,
+			active: Boolean = false,
+			activeUntil: ZonedDateTime? = null
+		): Customer = Customer(
 			id = id,
 			name = name,
 			email = email
-		)
+		).also {
+			it.active = active
+			it.activeUntil = activeUntil
+		}
 
 		fun create(name: String, email: String): Customer {
 			val customer = create(id = CustomerId.unique(), name = name, email = email)
