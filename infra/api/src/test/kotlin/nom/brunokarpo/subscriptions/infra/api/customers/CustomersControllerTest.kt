@@ -2,6 +2,7 @@ package nom.brunokarpo.subscriptions.infra.api.customers
 
 import io.mockk.coEvery
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
 import nom.brunokarpo.subscriptions.infra.api.ApiConfigurationTest
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CreateCustomerDto
@@ -52,5 +53,34 @@ class CustomersControllerTest : ApiConfigurationTest() {
 			.expectStatus().isBadRequest
 			.expectBody()
 			.jsonPath("$.message").isEqualTo("Customer with email '$expectedEmail' already exists!")
+	}
+
+	@Test
+	fun `should subscribe a product to user by name`() {
+		val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+		val productName = "PRODUCT_ID_1"
+
+		val expectedEmail = "<EMAIL>"
+		val productName2 = "PRODUCT_ID_2"
+
+		coEvery { subscribeProductToCustomerUseCase.execute(any()) } returns SubscribeProductToCustomerUseCase.Output(
+			email = expectedEmail,
+			products = listOf(productName, productName2),
+			validUntil = "2021-08-31"
+		)
+
+		val productSubscriptionDto = mapOf("productName" to productName)
+
+		client.post()
+			.uri("/v1/customers/$customerId/products")
+			.accept(MediaType.APPLICATION_JSON)
+			.bodyValue(productSubscriptionDto)
+			.exchange()
+			.expectStatus().isCreated
+			.expectBody()
+			.jsonPath("$.email").isEqualTo(expectedEmail)
+			.jsonPath("$.products[0]").isEqualTo(productName)
+			.jsonPath("$.products[1]").isEqualTo(productName2)
+			.jsonPath("$.validUntil").isEqualTo("2021-08-31")
 	}
 }

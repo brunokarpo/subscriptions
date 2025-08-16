@@ -1,12 +1,16 @@
 package nom.brunokarpo.subscriptions.infra.api.customers
 
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CreateCustomerDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CustomerDto
+import nom.brunokarpo.subscriptions.infra.api.customers.dtos.ProductSubscriptionCustomerDto
+import nom.brunokarpo.subscriptions.infra.api.customers.dtos.ProductSubscriptionDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -15,7 +19,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/v1/customers")
 class CustomersController(
-	private val createNewCustomerUseCase: CreateNewCustomerUseCase
+	private val createNewCustomerUseCase: CreateNewCustomerUseCase,
+	private val subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase,
 ) {
 
 	@PostMapping
@@ -31,6 +36,27 @@ class CustomersController(
 			id = output.id,
 			name = output.name,
 			email = output.email
+		)
+
+		return ResponseEntity.status(201).body(customerDto)
+	}
+
+	@PostMapping("/{customerId}/products")
+	suspend fun subscribeProductToCustomer(
+		@RequestBody productSubscriptionDto: ProductSubscriptionDto,
+		@PathVariable customerId: String
+	): ResponseEntity<ProductSubscriptionCustomerDto> {
+		val input = SubscribeProductToCustomerUseCase.Input(
+			customerId = customerId,
+			productName = productSubscriptionDto.productName
+		)
+
+		val output = subscribeProductToCustomerUseCase.execute(input)
+
+		val customerDto = ProductSubscriptionCustomerDto(
+			email = output.email,
+			products = output.products.toSet(),
+			validUntil = output.validUntil,
 		)
 
 		return ResponseEntity.status(201).body(customerDto)
