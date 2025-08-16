@@ -1,10 +1,10 @@
-package nom.brunokarpo.subscriptions.infra.api.controllers
+package nom.brunokarpo.subscriptions.infra.api.customers
 
 import io.mockk.coEvery
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
 import nom.brunokarpo.subscriptions.infra.api.ApiConfigurationTest
-import nom.brunokarpo.subscriptions.infra.api.dtos.CreateCustomerDto
+import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CreateCustomerDto
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 

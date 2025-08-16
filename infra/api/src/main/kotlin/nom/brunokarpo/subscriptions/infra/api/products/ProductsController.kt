@@ -1,9 +1,9 @@
-package nom.brunokarpo.subscriptions.infra.api.controllers
+package nom.brunokarpo.subscriptions.infra.api.products
 
 import nom.brunokarpo.subscriptions.application.product.CreateNewProductUseCase
 import nom.brunokarpo.subscriptions.application.product.exceptions.ProductUniqueNameException
-import nom.brunokarpo.subscriptions.infra.api.dtos.CreateProductDto
-import nom.brunokarpo.subscriptions.infra.api.dtos.ProductDtoResponse
+import nom.brunokarpo.subscriptions.infra.api.products.dtos.CreateProductDto
+import nom.brunokarpo.subscriptions.infra.api.products.dtos.ProductDtoResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler

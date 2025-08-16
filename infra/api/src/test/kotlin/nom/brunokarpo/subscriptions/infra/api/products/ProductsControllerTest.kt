@@ -1,11 +1,11 @@
-package nom.brunokarpo.subscriptions.infra.api.controllers
+package nom.brunokarpo.subscriptions.infra.api.products
 
 import io.mockk.coEvery
 import kotlinx.coroutines.test.runTest
 import nom.brunokarpo.subscriptions.application.product.CreateNewProductUseCase
 import nom.brunokarpo.subscriptions.application.product.exceptions.ProductUniqueNameException
 import nom.brunokarpo.subscriptions.infra.api.ApiConfigurationTest
-import nom.brunokarpo.subscriptions.infra.api.dtos.CreateProductDto
+import nom.brunokarpo.subscriptions.infra.api.products.dtos.CreateProductDto
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 
@@ -16,7 +16,10 @@ class ProductsControllerTest: ApiConfigurationTest() {
 		val expectedId = "79e9eb45-2835-49c8-ad3b-c951b591bc7f"
 		val expectedProductName = "Product 1"
 
-		coEvery { createProductUseCase.execute(any()) } returns CreateNewProductUseCase.Output(id = expectedId, name = expectedProductName)
+		coEvery { createProductUseCase.execute(any()) } returns CreateNewProductUseCase.Output(
+			id = expectedId,
+			name = expectedProductName
+		)
 
 		val productDto = CreateProductDto(name = expectedProductName)
 

@@ -1,9 +1,9 @@
-package nom.brunokarpo.subscriptions.infra.api.controllers
+package nom.brunokarpo.subscriptions.infra.api.customers
 
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
-import nom.brunokarpo.subscriptions.infra.api.dtos.CreateCustomerDto
-import nom.brunokarpo.subscriptions.infra.api.dtos.CustomerDto
+import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CreateCustomerDto
+import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CustomerDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
