@@ -1,8 +1,10 @@
 package nom.brunokarpo.subscriptions.application.customer
 
+import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerNotExistsException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
 import nom.brunokarpo.subscriptions.application.usecases.UseCase
+import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
 import nom.brunokarpo.subscriptions.domain.product.ProductRepository
 import java.time.format.DateTimeFormatter
@@ -13,7 +15,8 @@ class SubscribeProductToCustomerUseCase(
 ) : UseCase<SubscribeProductToCustomerUseCase.Input, SubscribeProductToCustomerUseCase.Output> {
 
 	override suspend fun execute(input: Input): Output {
-		val customer = customerRepository.findByEmail(input.customerEmail) ?: throw CustomerNotExistsException(input.customerEmail)
+		val customerId = CustomerId.from(input.customerId)
+		val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
 		val product = productRepository.findByName(input.productName) ?: throw ProductNotExistsException(input.productName)
 
 		customer.subscribe(product)
@@ -29,7 +32,7 @@ class SubscribeProductToCustomerUseCase(
 		)
 	}
 
-	class Input(val customerEmail: String, val productName: String)
+	class Input(val customerId: String, val productName: String)
 
 	class Output(val email: String, val products: List<String>, val validUntil: String)
 

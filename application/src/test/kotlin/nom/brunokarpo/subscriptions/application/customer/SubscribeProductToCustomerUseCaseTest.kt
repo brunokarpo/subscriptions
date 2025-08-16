@@ -4,9 +4,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerNotExistsException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
-import nom.brunokarpo.subscriptions.application.product.exceptions.ProductUniqueNameException
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
@@ -46,7 +46,7 @@ class SubscribeProductToCustomerUseCaseTest {
 		val customerId = CustomerId.unique()
 		val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
 		customer.activate()
-		coEvery { customerRepository.findByEmail(customerEmail) } returns customer
+		coEvery { customerRepository.findById(customerId) } returns customer
 
 		val productName = "Product Name"
 		val productId = ProductId.unique()
@@ -55,7 +55,7 @@ class SubscribeProductToCustomerUseCaseTest {
 
 		// when
 		val input = SubscribeProductToCustomerUseCase.Input(
-			customerEmail = customerEmail,
+			customerId = customerId.toString(),
 			productName = productName
 		)
 		val output = sut.execute(input)
@@ -71,24 +71,24 @@ class SubscribeProductToCustomerUseCaseTest {
 	@Test
 	fun `should not subscribe product to a non existent customer`() = runTest {
 		// given
-		val customerEmail = "<EMAIL>"
-		coEvery { customerRepository.findByEmail(customerEmail) } returns null
+		val customerId = CustomerId.unique()
+		coEvery { customerRepository.findById(customerId) } returns null
 
 		val productName = "Product Name"
 		coEvery { productRepository.findByName(productName) } returns Product.create(name = productName)
 
 		// when
 		val input = SubscribeProductToCustomerUseCase.Input(
-			customerEmail = customerEmail,
+			customerId = customerId.toString(),
 			productName = productName
 		)
-		val exception = assertThrows<CustomerNotExistsException> {
+		val exception = assertThrows<CustomerByIdNotFoundException> {
 			sut.execute(input)
 		}
 
 		// then
 		assertNotNull(exception)
-		assertEquals("Customer with email '$customerEmail' does not exists!", exception.message)
+		assertEquals("Customer with id '$customerId' does not exists!", exception.message)
 
 		coVerify(exactly = 0) { customerRepository.save(any()) }
 	}
@@ -101,14 +101,15 @@ class SubscribeProductToCustomerUseCaseTest {
 
 		val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
 		customer.activate()
-		coEvery { customerRepository.findByEmail(customerEmail) } returns customer
+		coEvery { customerRepository.findById(customerId) } returns customer
+		coEvery { customerRepository.findById(customerId) } returns customer
 
 		val productName = "productName"
 		coEvery { productRepository.findByName(productName) } returns null
 
 		// when
 		val input = SubscribeProductToCustomerUseCase.Input(
-			customerEmail = customerEmail,
+			customerId = customerId.toString(),
 			productName = productName
 		)
 		val exception = assertThrows<ProductNotExistsException> {
@@ -126,7 +127,7 @@ class SubscribeProductToCustomerUseCaseTest {
 		val customerEmail = "<EMAIL>"
 		val customerId = CustomerId.unique()
 		val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
-		coEvery { customerRepository.findByEmail(customerEmail) } returns customer
+		coEvery { customerRepository.findById(customerId) } returns customer
 
 		val productName = "Product Name"
 		val productId = ProductId.unique()
@@ -135,7 +136,7 @@ class SubscribeProductToCustomerUseCaseTest {
 
 		// when
 		val input = SubscribeProductToCustomerUseCase.Input(
-			customerEmail = customerEmail,
+			customerId = customerId.toString(),
 			productName = productName
 		)
 		val exception = assertThrows<CustomerNotActiveException> {
