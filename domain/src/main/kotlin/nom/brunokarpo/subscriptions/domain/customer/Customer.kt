@@ -26,7 +26,7 @@ class Customer private constructor(
 
 	companion object {
 		/**
-		 * This method should only be used by the repository layer to reconstruct the entity without generate any domain event.
+		 * This method should only be used by the repository layer or test to construct the entity without generate any domain event.
 		 * For business logic purpose use #create(name: String, email: String) method
 		 */
 		fun create(
