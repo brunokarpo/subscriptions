@@ -17,7 +17,7 @@ class CustomerDatabaseRepository(
 	}
 
 	override suspend fun findById(id: CustomerId): Customer? {
-		TODO("Not yet implemented")s
+		return customerJpaRepository.findById(id.value()).orElse(null)?.toDomain()
 	}
 
 	override suspend fun findByEmail(email: String): Customer? {

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertNull
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import java.time.ZonedDateTime
@@ -64,7 +65,35 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 
 		val customer = sut.findByEmail(email)
 
-		assertEquals(customer, null)
+		assertNull(customer)
+	}
+
+	@Test
+	@Sql(scripts = ["/create_customers.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+	fun `should find customer by id`() = runTest {
+		val expectedId = CustomerId.from("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
+		val expectedName = "John Doe"
+		val expectedEmail = "john@email.com"
+		val expectedActive = true
+		val expectedEndAt = ZonedDateTime.parse("2021-08-31T23:59:59Z")
+
+		val customer = sut.findById(expectedId)
+
+		assertNotNull(customer)
+		assertEquals(expectedId, customer?.id)
+		assertEquals(expectedName, customer?.name)
+		assertEquals(expectedEmail, customer?.email)
+		assertEquals(expectedActive, customer?.active)
+		assertEquals(expectedEndAt, customer?.activeUntil)
+	}
+
+	@Test
+	fun `should return null when customer not exists by id`() = runTest {
+		val expectedId = CustomerId.from("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
+
+		val customer = sut.findById(expectedId)
+
+		assertNull(customer)
 	}
 
 	@Test
