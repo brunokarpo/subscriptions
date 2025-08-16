@@ -6,11 +6,12 @@ import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscriptions
 import nom.brunokarpo.subscriptions.domain.product.Product
 import java.time.ZonedDateTime
 
-class Customer(
+class Customer private constructor(
 	override val id: CustomerId,
 	val name: String,
 	val email: String
@@ -24,12 +25,17 @@ class Customer(
 		private set
 
 	companion object {
+		/**
+		 * This method should only be used by the repository layer to reconstruct the entity without generate any domain event.
+		 * For business logic purpose use #create(name: String, email: String) method
+		 */
 		fun create(
 			id: CustomerId,
 			name: String,
 			email: String,
 			active: Boolean = false,
-			activeUntil: ZonedDateTime? = null
+			activeUntil: ZonedDateTime? = null,
+			products: List<Product> = listOf()
 		): Customer = Customer(
 			id = id,
 			name = name,
@@ -37,6 +43,8 @@ class Customer(
 		).also {
 			it.active = active
 			it.activeUntil = activeUntil
+
+			products.map { product -> it.subscriptions.add(product) }
 		}
 
 		fun create(name: String, email: String): Customer {

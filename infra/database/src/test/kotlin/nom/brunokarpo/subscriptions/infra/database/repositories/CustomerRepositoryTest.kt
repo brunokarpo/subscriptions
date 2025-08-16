@@ -90,4 +90,27 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 		assertTrue(result?.active ?: false)
 		assertTrue(result?.activeUntil!!.isAfter(ZonedDateTime.now()))
 	}
+
+	@Test
+	@Sql(scripts = ["/create_customers.sql", "/create_subscriptions.sql", "/create_products.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+	fun `should load the subscriptions from database`() = runTest {
+		// given
+		val expectedEmail = "alice@email.com"
+
+		// when
+		val customer = sut.findByEmail(expectedEmail)
+
+		// then
+		assertNotNull(customer!!)
+
+		val activationKey = customer.activationKey()
+		assertNotNull(activationKey)
+		assertEquals(3, activationKey.products.size)
+		assertTrue(activationKey.products.contains("database product 2"))
+		assertTrue(activationKey.products.contains("database product 3"))
+		assertTrue(activationKey.products.contains("database product 4"))
+
+		// verify if any domain event was generated
+		assertTrue(customer.domainEvents().isEmpty())
+	}
 }
