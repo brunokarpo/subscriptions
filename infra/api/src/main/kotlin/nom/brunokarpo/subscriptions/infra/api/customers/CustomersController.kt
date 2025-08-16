@@ -2,7 +2,7 @@ package nom.brunokarpo.subscriptions.infra.api.customers
 
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
-import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
+import nom.brunokarpo.subscriptions.application.usecases.ApplicationException
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CreateCustomerDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CustomerDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.ProductSubscriptionCustomerDto
@@ -62,10 +62,9 @@ class CustomersController(
 		return ResponseEntity.status(201).body(customerDto)
 	}
 
-	@ExceptionHandler(CustomerUniqueEmailException::class)
-	suspend fun handleCustomerUniqueEmailException(
-		ex: CustomerUniqueEmailException
-	): ResponseEntity<Map<String, String>> =
+
+	@ExceptionHandler(ApplicationException::class)
+	fun handleApplicationException(ex: ApplicationException): ResponseEntity<Map<String, String>> =
 		ResponseEntity.status(
 			HttpStatus.BAD_REQUEST
 		).body(

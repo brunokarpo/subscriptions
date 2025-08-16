@@ -14,6 +14,7 @@ class SubscribeProductToCustomerUseCase(
 	private val productRepository: ProductRepository
 ) : UseCase<SubscribeProductToCustomerUseCase.Input, SubscribeProductToCustomerUseCase.Output> {
 
+	@Throws(CustomerByIdNotFoundException::class, CustomerNotExistsException::class, ProductNotExistsException::class)
 	override suspend fun execute(input: Input): Output {
 		val customerId = CustomerId.from(input.customerId)
 		val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)

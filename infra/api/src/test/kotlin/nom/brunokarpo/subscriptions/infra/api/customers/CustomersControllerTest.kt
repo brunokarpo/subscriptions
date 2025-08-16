@@ -3,9 +3,13 @@ package nom.brunokarpo.subscriptions.infra.api.customers
 import io.mockk.coEvery
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
+import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
+import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.infra.api.ApiConfigurationTest
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CreateCustomerDto
+import nom.brunokarpo.subscriptions.infra.api.customers.dtos.ProductSubscriptionDto
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 
@@ -69,7 +73,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
 			validUntil = "2021-08-31"
 		)
 
-		val productSubscriptionDto = mapOf("productName" to productName)
+		val productSubscriptionDto = ProductSubscriptionDto(productName = productName)
 
 		client.post()
 			.uri("/v1/customers/$customerId/products")
@@ -82,5 +86,45 @@ class CustomersControllerTest : ApiConfigurationTest() {
 			.jsonPath("$.products[0]").isEqualTo(productName)
 			.jsonPath("$.products[1]").isEqualTo(productName2)
 			.jsonPath("$.validUntil").isEqualTo("2021-08-31")
+	}
+
+	@Test
+	fun `should return bad request if the product does not exist for subscription`() {
+		val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+		val productName = "PRODUCT_ID_1"
+
+		coEvery { subscribeProductToCustomerUseCase.execute(any()) } throws ProductNotExistsException(productName)
+
+		val productSubscriptionDto = ProductSubscriptionDto(productName = productName)
+
+		client.post()
+			.uri("/v1/customers/$customerId/products")
+			.accept(MediaType.APPLICATION_JSON)
+			.bodyValue(productSubscriptionDto)
+			.exchange()
+			.expectStatus().isBadRequest
+			.expectBody()
+			.jsonPath("$.message").isEqualTo("Product with name '$productName' does not exists!")
+	}
+
+	@Test
+	fun `should return bad request if the customer does not exists for subscription`() {
+		val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+		val productName = "PRODUCT_ID_1"
+
+		coEvery { subscribeProductToCustomerUseCase.execute(any()) } throws CustomerByIdNotFoundException(
+			CustomerId.from(customerId)
+		)
+
+		val productSubscriptionDto = ProductSubscriptionDto(productName = productName)
+
+		client.post()
+			.uri("/v1/customers/$customerId/products")
+			.accept(MediaType.APPLICATION_JSON)
+			.bodyValue(productSubscriptionDto)
+			.exchange()
+			.expectStatus().isBadRequest
+			.expectBody()
+			.jsonPath("$.message").isEqualTo("Customer with id '$customerId' does not exists!")
 	}
 }
