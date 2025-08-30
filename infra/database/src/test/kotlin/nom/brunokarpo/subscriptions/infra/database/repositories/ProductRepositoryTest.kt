@@ -33,8 +33,9 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	@Sql(scripts = ["/create_products.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	fun `should find product by name`() = runTest {
+		loadDatabase("/create_products.sql")
+
 		val name = "database product"
 
 		val product = sut.findByName(name)
@@ -54,8 +55,9 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	@Sql(scripts = ["/create_products.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	fun `should find product by name even when case does not match exactly`() = runTest {
+		loadDatabase("/create_products.sql")
+
 		val name = "DATABASE PRODUCT"
 
 		val product = sut.findByName(name)
