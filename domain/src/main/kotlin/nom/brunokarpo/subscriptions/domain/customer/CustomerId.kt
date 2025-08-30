@@ -10,5 +10,6 @@ class CustomerId private constructor(
 	companion object {
 		fun unique(): CustomerId = CustomerId(UUID.randomUUID())
 		fun from(uuid: UUID): CustomerId = CustomerId(uuid)
+		fun from(id: String): CustomerId = CustomerId(UUID.fromString(id))
 	}
 }

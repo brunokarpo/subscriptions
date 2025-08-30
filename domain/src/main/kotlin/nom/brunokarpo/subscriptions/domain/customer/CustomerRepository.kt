@@ -1,8 +1,8 @@
 package nom.brunokarpo.subscriptions.domain.customer
 
-interface CustomerRepository {
+import nom.brunokarpo.subscriptions.domain.common.Repository
 
-	suspend fun save(customer: Customer)
+interface CustomerRepository : Repository<Customer, CustomerId> {
 
 	suspend fun findByEmail(email: String): Customer?
 }

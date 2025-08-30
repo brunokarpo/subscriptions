@@ -7,7 +7,7 @@ import nom.brunokarpo.subscriptions.domain.product.ProductId
 import java.util.UUID
 
 @Entity(name = "products")
-class ProductEntity {
+class ProductMapper {
 
 	@Id
 	lateinit var id: UUID
@@ -16,7 +16,7 @@ class ProductEntity {
 	fun toDomain(): Product = Product.create(ProductId.from(id), name)
 
 	companion object {
-		fun from(product: Product): ProductEntity = ProductEntity().also {
+		fun from(product: Product): ProductMapper = ProductMapper().also {
 			it.id = product.id.value()
 			it.name = product.name
 		}

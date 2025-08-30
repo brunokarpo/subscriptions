@@ -1,4 +1,4 @@
-package nom.brunokarpo.subscriptions.infra.api.dtos
+package nom.brunokarpo.subscriptions.infra.api.customers.dtos
 
 data class CreateCustomerDto(
 	val name: String,

@@ -2,6 +2,7 @@ package nom.brunokarpo.subscriptions.infra.api
 
 import com.ninjasquad.springmockk.MockkBean
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.product.CreateNewProductUseCase
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,8 @@ class ApiConfigurationTest {
 	lateinit var createProductUseCase: CreateNewProductUseCase
 	@MockkBean
 	lateinit var createNewCustomerUseCase: CreateNewCustomerUseCase
+	@MockkBean
+	lateinit var subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase
 
 	@Autowired
 	lateinit var client: WebTestClient

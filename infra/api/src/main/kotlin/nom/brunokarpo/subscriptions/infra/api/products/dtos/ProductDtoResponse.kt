@@ -1,4 +1,4 @@
-package nom.brunokarpo.subscriptions.infra.api.dtos
+package nom.brunokarpo.subscriptions.infra.api.products.dtos
 
 data class ProductDtoResponse(
 	val id: String,
