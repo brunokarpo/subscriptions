@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNotNull
 import org.junit.jupiter.api.assertNull
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.jdbc.Sql
 
 class ProductRepositoryTest : DatabaseConfigurationTest() {
 
@@ -33,8 +32,9 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	@Sql(scripts = ["/create_products.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	fun `should find product by name`() = runTest {
+		loadDatabase("/create_products.sql")
+
 		val name = "database product"
 
 		val product = sut.findByName(name)
@@ -54,8 +54,9 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	@Sql(scripts = ["/create_products.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	fun `should find product by name even when case does not match exactly`() = runTest {
+		loadDatabase("/create_products.sql")
+
 		val name = "DATABASE PRODUCT"
 
 		val product = sut.findByName(name)

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertNull
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.jdbc.Sql
 import java.time.ZonedDateTime
 import java.util.UUID
 
@@ -41,8 +40,9 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	@Sql(scripts = ["/create_customers.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	fun `should find customer by email`() = runTest {
+		loadDatabase("/create_customers.sql")
+
 		val expectedId = UUID.fromString("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
 		val expectedName = "John Doe"
 		val expectedEmail = "john@email.com"
@@ -69,8 +69,9 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	@Sql(scripts = ["/create_customers.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	fun `should find customer by id`() = runTest {
+		loadDatabase("/create_customers.sql")
+
 		val expectedId = CustomerId.from("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
 		val expectedName = "John Doe"
 		val expectedEmail = "john@email.com"
@@ -97,8 +98,9 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	@Sql(scripts = ["/create_customers.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	fun `should update active and active untl of existent customer`() = runTest {
+		loadDatabase("/create_customers.sql")
+
 		// given
 		val expectedEmail = "sara@email.com"
 		val customer = sut.findByEmail(expectedEmail)
@@ -121,8 +123,11 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 	}
 
 	@Test
-	@Sql(scripts = ["/create_customers.sql", "/create_subscriptions.sql", "/create_products.sql"], executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 	fun `should load the subscriptions from database`() = runTest {
+		loadDatabase("/create_customers.sql")
+		loadDatabase("/create_subscriptions.sql")
+		loadDatabase("/create_products.sql")
+
 		// given
 		val expectedEmail = "alice@email.com"
 
