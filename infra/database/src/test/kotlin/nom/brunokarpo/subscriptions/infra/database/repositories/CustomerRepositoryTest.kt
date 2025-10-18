@@ -4,6 +4,7 @@ import kotlinx.coroutines.test.runTest
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.infra.database.DatabaseConfigurationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -102,7 +103,7 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
         }
 
     @Test
-    fun `should update active and active untl of existent customer`() =
+    fun `should update active and active until of existent customer`() =
         runTest {
             loadDatabase("/create_customers.sql")
 
@@ -131,8 +132,8 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
     fun `should load the subscriptions from database`() =
         runTest {
             loadDatabase("/create_customers.sql")
-            loadDatabase("/create_subscriptions.sql")
             loadDatabase("/create_products.sql")
+            loadDatabase("/create_subscriptions.sql")
 
             // given
             val expectedEmail = "alice@email.com"
@@ -143,12 +144,11 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
             // then
             assertNotNull(customer!!)
 
-            val activationKey = customer.activationKey()
-            assertNotNull(activationKey)
-            assertEquals(3, activationKey.products.size)
-            assertTrue(activationKey.products.contains("database product 2"))
-            assertTrue(activationKey.products.contains("database product 3"))
-            assertTrue(activationKey.products.contains("database product 4"))
+            assertEquals(3, customer.subscriptions.size)
+
+            assertNotNull(customer.subscriptions.firstOrNull { sub -> sub.productName == "database product 2" && sub.status == SubscriptionStatus.REQUESTED })
+            assertNotNull(customer.subscriptions.firstOrNull { sub -> sub.productName == "database product 3" && sub.status == SubscriptionStatus.REQUESTED })
+            assertNotNull(customer.subscriptions.firstOrNull { sub -> sub.productName == "database product 4" && sub.status == SubscriptionStatus.REQUESTED })
 
             // verify if any domain event was generated
             assertTrue(customer.domainEvents().isEmpty())
