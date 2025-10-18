@@ -2,14 +2,15 @@ package nom.brunokarpo.subscriptions.infra.api.customers
 
 import io.mockk.coEvery
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.infra.api.ApiConfigurationTest
-import nom.brunokarpo.subscriptions.infra.api.customers.dtos.CreateCustomerDto
-import nom.brunokarpo.subscriptions.infra.api.customers.dtos.ProductSubscriptionDto
+import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestCreateCustomerDto
+import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestProductSubscriptionDto
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 
@@ -27,7 +28,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
                 email = expectedEmail,
             )
 
-        val clientDto = CreateCustomerDto(name = expectedName, email = expectedEmail)
+        val clientDto = RequestCreateCustomerDto(name = expectedName, email = expectedEmail)
 
         client
             .post()
@@ -52,7 +53,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         coEvery { createNewCustomerUseCase.execute(any()) } throws CustomerUniqueEmailException(expectedEmail)
 
-        val customerDto = CreateCustomerDto(name = "Name", email = expectedEmail)
+        val customerDto = RequestCreateCustomerDto(name = "Name", email = expectedEmail)
 
         client
             .post()
@@ -81,13 +82,13 @@ class CustomersControllerTest : ApiConfigurationTest() {
                 subscriptionStatus = "REQUESTED",
             )
 
-        val productSubscriptionDto = ProductSubscriptionDto(productName = productName)
+        val requestProductSubscriptionDto = RequestProductSubscriptionDto(productName = productName)
 
         client
             .post()
             .uri("/v1/customers/$customerId/products")
             .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(productSubscriptionDto)
+            .bodyValue(requestProductSubscriptionDto)
             .exchange()
             .expectStatus()
             .isCreated
@@ -107,13 +108,13 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         coEvery { subscribeProductToCustomerUseCase.execute(any()) } throws ProductNotExistsException(productName)
 
-        val productSubscriptionDto = ProductSubscriptionDto(productName = productName)
+        val requestProductSubscriptionDto = RequestProductSubscriptionDto(productName = productName)
 
         client
             .post()
             .uri("/v1/customers/$customerId/products")
             .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(productSubscriptionDto)
+            .bodyValue(requestProductSubscriptionDto)
             .exchange()
             .expectStatus()
             .isBadRequest
@@ -132,18 +133,62 @@ class CustomersControllerTest : ApiConfigurationTest() {
                 CustomerId.from(customerId),
             )
 
-        val productSubscriptionDto = ProductSubscriptionDto(productName = productName)
+        val requestProductSubscriptionDto = RequestProductSubscriptionDto(productName = productName)
 
         client
             .post()
             .uri("/v1/customers/$customerId/products")
             .accept(MediaType.APPLICATION_JSON)
-            .bodyValue(productSubscriptionDto)
+            .bodyValue(requestProductSubscriptionDto)
             .exchange()
             .expectStatus()
             .isBadRequest
             .expectBody()
             .jsonPath("$.message")
             .isEqualTo("Customer with id '$customerId' does not exists!")
+    }
+
+    @Test
+    fun `should list customer subscription by status`() {
+        val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+        val productId1 = "PRODUCT_ID_1"
+        val productId2 = "PRODUCT_ID_2"
+
+        coEvery {
+            retrieveCustomersSubscriptionByStatusUseCase.execute(any())
+        } returns
+            RetrieveCustomersSubscriptionsRequestedUseCase.Output(
+                customerId = customerId,
+                subscriptions =
+                    listOf(
+                        RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
+                            productId = productId1,
+                            status = "REQUESTED",
+                        ),
+                        RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
+                            productId = productId2,
+                            status = "REQUESTED",
+                        ),
+                    ),
+            )
+
+        client
+            .get()
+            .uri("/v1/customers/$customerId/subscriptions?status=REQUESTED")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.customerId")
+            .isEqualTo(customerId)
+            .jsonPath("$.subscriptions[0].productId")
+            .isEqualTo(productId1)
+            .jsonPath("$.subscriptions[0].status")
+            .isEqualTo("REQUESTED")
+            .jsonPath("$.subscriptions[1].productId")
+            .isEqualTo(productId2)
+            .jsonPath("$.subscriptions[1].status")
+            .isEqualTo("REQUESTED")
     }
 }
