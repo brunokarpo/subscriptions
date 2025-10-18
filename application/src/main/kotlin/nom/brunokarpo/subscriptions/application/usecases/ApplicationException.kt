@@ -1,5 +1,5 @@
 package nom.brunokarpo.subscriptions.application.usecases
 
 abstract class ApplicationException(
-	message: String
+    message: String,
 ) : RuntimeException(message, null, true, false)

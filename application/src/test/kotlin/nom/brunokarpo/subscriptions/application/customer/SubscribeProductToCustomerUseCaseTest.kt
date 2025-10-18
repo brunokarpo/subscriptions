@@ -22,129 +22,140 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertContains
 
 class SubscribeProductToCustomerUseCaseTest {
+    private lateinit var customerRepository: CustomerRepository
+    private lateinit var productRepository: ProductRepository
 
-	private lateinit var customerRepository: CustomerRepository
-	private lateinit var productRepository: ProductRepository
+    private lateinit var sut: SubscribeProductToCustomerUseCase
 
-	private lateinit var sut: SubscribeProductToCustomerUseCase
+    @BeforeEach
+    fun setUp() {
+        customerRepository = mockk(relaxed = true)
+        productRepository = mockk(relaxed = true)
 
-	@BeforeEach
-	fun setUp() {
-		customerRepository = mockk(relaxed = true)
-		productRepository = mockk(relaxed = true)
+        sut =
+            SubscribeProductToCustomerUseCase(
+                customerRepository = customerRepository,
+                productRepository = productRepository,
+            )
+    }
 
-		sut = SubscribeProductToCustomerUseCase(
-			customerRepository = customerRepository,
-			productRepository = productRepository
-		)
-	}
+    @Test
+    fun `should subscribe product to customer`() =
+        runTest {
+            // given
+            val customerEmail = "<EMAIL>"
+            val customerId = CustomerId.unique()
+            val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
+            customer.activate()
+            coEvery { customerRepository.findById(customerId) } returns customer
 
-	@Test
-	fun `should subscribe product to customer`() = runTest {
-		// given
-		val customerEmail = "<EMAIL>"
-		val customerId = CustomerId.unique()
-		val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
-		customer.activate()
-		coEvery { customerRepository.findById(customerId) } returns customer
+            val productName = "Product Name"
+            val productId = ProductId.unique()
+            val product = Product.create(productId = productId, name = productName)
+            coEvery { productRepository.findByName(productName) } returns product
 
-		val productName = "Product Name"
-		val productId = ProductId.unique()
-		val product = Product.create(productId = productId, name = productName)
-		coEvery { productRepository.findByName(productName) } returns product
+            // when
+            val input =
+                SubscribeProductToCustomerUseCase.Input(
+                    customerId = customerId.toString(),
+                    productName = productName,
+                )
+            val output = sut.execute(input)
 
-		// when
-		val input = SubscribeProductToCustomerUseCase.Input(
-			customerId = customerId.toString(),
-			productName = productName
-		)
-		val output = sut.execute(input)
+            // then
+            assertEquals(customerEmail, output.email)
+            assertContains(output.products, productName)
+            assertNotNull(output.validUntil)
 
-		// then
-		assertEquals(customerEmail, output.email)
-		assertContains(output.products, productName)
-		assertNotNull(output.validUntil)
+            coVerify(exactly = 1) { customerRepository.save(customer) }
+        }
 
-		coVerify(exactly = 1) { customerRepository.save(customer) }
-	}
+    @Test
+    fun `should not subscribe product to a non existent customer`() =
+        runTest {
+            // given
+            val customerId = CustomerId.unique()
+            coEvery { customerRepository.findById(customerId) } returns null
 
-	@Test
-	fun `should not subscribe product to a non existent customer`() = runTest {
-		// given
-		val customerId = CustomerId.unique()
-		coEvery { customerRepository.findById(customerId) } returns null
+            val productName = "Product Name"
+            coEvery { productRepository.findByName(productName) } returns Product.create(name = productName)
 
-		val productName = "Product Name"
-		coEvery { productRepository.findByName(productName) } returns Product.create(name = productName)
+            // when
+            val input =
+                SubscribeProductToCustomerUseCase.Input(
+                    customerId = customerId.toString(),
+                    productName = productName,
+                )
+            val exception =
+                assertThrows<CustomerByIdNotFoundException> {
+                    sut.execute(input)
+                }
 
-		// when
-		val input = SubscribeProductToCustomerUseCase.Input(
-			customerId = customerId.toString(),
-			productName = productName
-		)
-		val exception = assertThrows<CustomerByIdNotFoundException> {
-			sut.execute(input)
-		}
+            // then
+            assertNotNull(exception)
+            assertEquals("Customer with id '$customerId' does not exists!", exception.message)
 
-		// then
-		assertNotNull(exception)
-		assertEquals("Customer with id '$customerId' does not exists!", exception.message)
+            coVerify(exactly = 0) { customerRepository.save(any()) }
+        }
 
-		coVerify(exactly = 0) { customerRepository.save(any()) }
-	}
+    @Test
+    fun `should not subscribe non existent product to a customer`() =
+        runTest {
+            // given
+            val customerEmail = "<EMAIL>"
+            val customerId = CustomerId.unique()
 
-	@Test
-	fun `should not subscribe non existent product to a customer`() = runTest {
-		// given
-		val customerEmail = "<EMAIL>"
-		val customerId = CustomerId.unique()
+            val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
+            customer.activate()
+            coEvery { customerRepository.findById(customerId) } returns customer
+            coEvery { customerRepository.findById(customerId) } returns customer
 
-		val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
-		customer.activate()
-		coEvery { customerRepository.findById(customerId) } returns customer
-		coEvery { customerRepository.findById(customerId) } returns customer
+            val productName = "productName"
+            coEvery { productRepository.findByName(productName) } returns null
 
-		val productName = "productName"
-		coEvery { productRepository.findByName(productName) } returns null
+            // when
+            val input =
+                SubscribeProductToCustomerUseCase.Input(
+                    customerId = customerId.toString(),
+                    productName = productName,
+                )
+            val exception =
+                assertThrows<ProductNotExistsException> {
+                    sut.execute(input)
+                }
 
-		// when
-		val input = SubscribeProductToCustomerUseCase.Input(
-			customerId = customerId.toString(),
-			productName = productName
-		)
-		val exception = assertThrows<ProductNotExistsException> {
-			sut.execute(input)
-		}
+            // then
+            assertNotNull(exception)
+            assertEquals("Product with name '$productName' does not exists!", exception.message)
+        }
 
-		// then
-		assertNotNull(exception)
-		assertEquals("Product with name '$productName' does not exists!", exception.message)
-	}
+    @Test
+    fun `should not subscribe product to a disabled customer`() =
+        runTest {
+            // given
+            val customerEmail = "<EMAIL>"
+            val customerId = CustomerId.unique()
+            val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
+            coEvery { customerRepository.findById(customerId) } returns customer
 
-	@Test
-	fun `should not subscribe product to a disabled customer`() = runTest {
-		// given
-		val customerEmail = "<EMAIL>"
-		val customerId = CustomerId.unique()
-		val customer = Customer.create(id = customerId, name = "Customer Name", email = customerEmail)
-		coEvery { customerRepository.findById(customerId) } returns customer
+            val productName = "Product Name"
+            val productId = ProductId.unique()
+            val product = Product.create(productId = productId, name = productName)
+            coEvery { productRepository.findByName(productName) } returns product
 
-		val productName = "Product Name"
-		val productId = ProductId.unique()
-		val product = Product.create(productId = productId, name = productName)
-		coEvery { productRepository.findByName(productName) } returns product
+            // when
+            val input =
+                SubscribeProductToCustomerUseCase.Input(
+                    customerId = customerId.toString(),
+                    productName = productName,
+                )
+            val exception =
+                assertThrows<CustomerNotActiveException> {
+                    sut.execute(input)
+                }
 
-		// when
-		val input = SubscribeProductToCustomerUseCase.Input(
-			customerId = customerId.toString(),
-			productName = productName
-		)
-		val exception = assertThrows<CustomerNotActiveException> {
-			sut.execute(input)
-		}
-
-		// then
-		assertNotNull(exception)
-		assertEquals("Customer with id: $customerId is not active!", exception.message)
-	}
+            // then
+            assertNotNull(exception)
+            assertEquals("Customer with id: $customerId is not active!", exception.message)
+        }
 }

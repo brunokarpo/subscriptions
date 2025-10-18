@@ -9,18 +9,13 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class ProductDatabaseRepository(
-	private val productJpaRepository: ProductJpaRepository
+    private val productJpaRepository: ProductJpaRepository,
 ) : ProductRepository {
-
-	override suspend fun save(aggregate: Product) {
-		productJpaRepository.save(ProductMapper.from(aggregate))
-	}
-
-    override suspend fun findById(id: ProductId): Product? {
-        return productJpaRepository.findById(id.value()).orElse(null)?.toDomain()
+    override suspend fun save(aggregate: Product) {
+        productJpaRepository.save(ProductMapper.from(aggregate))
     }
 
-    override suspend fun findByName(name: String): Product? {
-		return productJpaRepository.findByNameIgnoreCase(name)?.toDomain()
-	}
+    override suspend fun findById(id: ProductId): Product? = productJpaRepository.findById(id.value()).orElse(null)?.toDomain()
+
+    override suspend fun findByName(name: String): Product? = productJpaRepository.findByNameIgnoreCase(name)?.toDomain()
 }

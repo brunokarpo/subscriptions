@@ -6,11 +6,11 @@ import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
 
 class ContainersInitializer : ApplicationContextInitializer<ConfigurableApplicationContext> {
-	override fun initialize(applicationContext: ConfigurableApplicationContext) {
-		PostgresContainer.start()
-		PostgresContainer.migrate()
-		TestPropertyValues
-			.of(PostgresContainer.environment.map { (k, v) -> "$k=$v" })
-			.applyTo(applicationContext.environment)
-	}
+    override fun initialize(applicationContext: ConfigurableApplicationContext) {
+        PostgresContainer.start()
+        PostgresContainer.migrate()
+        TestPropertyValues
+            .of(PostgresContainer.environment.map { (k, v) -> "$k=$v" })
+            .applyTo(applicationContext.environment)
+    }
 }

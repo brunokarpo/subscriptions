@@ -10,17 +10,13 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class CustomerDatabaseRepository(
-	private val customerJpaRepository: CustomerJpaRepository
+    private val customerJpaRepository: CustomerJpaRepository,
 ) : CustomerRepository {
-	override suspend fun save(aggregate: Customer) {
-		customerJpaRepository.save(CustomerMapper.from(aggregate))
-	}
+    override suspend fun save(aggregate: Customer) {
+        customerJpaRepository.save(CustomerMapper.from(aggregate))
+    }
 
-	override suspend fun findById(id: CustomerId): Customer? {
-		return customerJpaRepository.findById(id.value()).orElse(null)?.toDomain()
-	}
+    override suspend fun findById(id: CustomerId): Customer? = customerJpaRepository.findById(id.value()).orElse(null)?.toDomain()
 
-	override suspend fun findByEmail(email: String): Customer? {
-		return customerJpaRepository.findByEmailIgnoreCase(email)?.toDomain()
-	}
+    override suspend fun findByEmail(email: String): Customer? = customerJpaRepository.findByEmailIgnoreCase(email)?.toDomain()
 }

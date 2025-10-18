@@ -5,7 +5,7 @@ import nom.brunokarpo.subscriptions.domain.product.ProductId
 import java.time.ZonedDateTime
 
 class ProductCreated(
-	override val domainId: ProductId,
-	override val occurredOn: ZonedDateTime = ZonedDateTime.now(),
-	val name: String
+    override val domainId: ProductId,
+    override val occurredOn: ZonedDateTime = ZonedDateTime.now(),
+    val name: String,
 ) : DomainEvent

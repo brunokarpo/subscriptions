@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository
 import java.util.UUID
 
 interface CustomerJpaRepository : CrudRepository<CustomerMapper, UUID> {
-	fun findByEmailIgnoreCase(email: String): CustomerMapper?
+    fun findByEmailIgnoreCase(email: String): CustomerMapper?
 }

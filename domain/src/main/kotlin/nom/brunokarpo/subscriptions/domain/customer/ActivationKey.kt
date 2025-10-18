@@ -2,8 +2,9 @@ package nom.brunokarpo.subscriptions.domain.customer
 
 import java.time.ZonedDateTime
 
-class ActivationKey private constructor(customer: Customer) {
-
+class ActivationKey private constructor(
+    customer: Customer,
+) {
     companion object {
         fun of(customer: Customer): ActivationKey = ActivationKey(customer)
     }

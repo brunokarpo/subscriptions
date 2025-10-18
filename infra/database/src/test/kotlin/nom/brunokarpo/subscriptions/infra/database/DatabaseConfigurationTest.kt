@@ -9,33 +9,32 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ContextConfiguration
 
 @SpringBootTest(
-	webEnvironment = SpringBootTest.WebEnvironment.NONE,
-	classes = [DatabaseConfiguration::class]
+    webEnvironment = SpringBootTest.WebEnvironment.NONE,
+    classes = [DatabaseConfiguration::class],
 )
 @ContextConfiguration(initializers = [ContainersInitializer::class])
 open class DatabaseConfigurationTest {
+    @Autowired
+    private lateinit var jdbcTemplate: JdbcTemplate
 
-	@Autowired
-	private lateinit var jdbcTemplate: JdbcTemplate
+    @Test
+    fun initContexts() {
+    }
 
-	@Test
-	fun initContexts() {
-	}
+    @BeforeEach
+    fun setUp() {
+        val sql = this.javaClass.getResource("/clear_tables.sql")
+        if (sql != null) {
+            jdbcTemplate.execute(sql.readText())
+        }
+        println("Data cleared from tables")
+    }
 
-	@BeforeEach
-	fun setUp() {
-		val sql = this.javaClass.getResource("/clear_tables.sql")
-		if (sql != null) {
-			jdbcTemplate.execute(sql.readText())
-		}
-		println("Data cleared from tables")
-	}
-
-	protected suspend fun loadDatabase(resourceName: String) {
-		val sql = this.javaClass.getResource(resourceName)
-		if (sql != null) {
-			jdbcTemplate.execute(sql.readText())
-		}
-		println("Data loaded from $resourceName")
-	}
+    protected suspend fun loadDatabase(resourceName: String) {
+        val sql = this.javaClass.getResource(resourceName)
+        if (sql != null) {
+            jdbcTemplate.execute(sql.readText())
+        }
+        println("Data loaded from $resourceName")
+    }
 }

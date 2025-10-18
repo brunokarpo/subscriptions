@@ -14,41 +14,40 @@ private const val PASSWORD = USERNAME
 private const val MIGRATION_FILES = "../scripts/db/migrations"
 
 object PostgresContainer {
+    @Container
+    val container: JdbcDatabaseContainer<*> =
+        PostgreSQLContainer<Nothing>(DATABASE_VERSION).apply {
+            withExposedPorts(PORT)
+            withDatabaseName(DATABASE_NAME)
+            withUsername(USERNAME)
+            withPassword(PASSWORD)
+            withReuse(false)
+        }
 
-	@Container
-	val container: JdbcDatabaseContainer<*> =
-		PostgreSQLContainer<Nothing>(DATABASE_VERSION).apply {
-			withExposedPorts(PORT)
-			withDatabaseName(DATABASE_NAME)
-			withUsername(USERNAME)
-			withPassword(PASSWORD)
-			withReuse(false)
-		}
+    fun start() {
+        container.apply {
+            start()
+            waitingFor(Wait.forListeningPort())
+        }
+    }
 
-	fun start() {
-		container.apply {
-			start()
-			waitingFor(Wait.forListeningPort())
-		}
-	}
+    fun migrate() {
+        Flyway
+            .configure()
+            .dataSource(container.jdbcUrl, container.username, container.password)
+            .locations("filesystem:$MIGRATION_FILES")
+            .configuration(mapOf("flyway.postgresql.transactional.lock" to "false"))
+            .load()
+            .migrate()
+    }
 
-	fun migrate() {
-		Flyway
-			.configure()
-			.dataSource(container.jdbcUrl, container.username, container.password)
-			.locations("filesystem:$MIGRATION_FILES")
-			.configuration(mapOf("flyway.postgresql.transactional.lock" to "false"))
-			.load()
-			.migrate()
-	}
-
-	val environment: Map<String, String>
-		get() {
-			return mapOf(
-				"spring.datasource.url" to container.jdbcUrl,
-				"spring.datasource.username" to container.username,
-				"spring.datasource.password" to container.password,
-				"spring.hibernate.jpa.hibernate.ddl-auto" to "none"
-			)
-		}
+    val environment: Map<String, String>
+        get() {
+            return mapOf(
+                "spring.datasource.url" to container.jdbcUrl,
+                "spring.datasource.username" to container.username,
+                "spring.datasource.password" to container.password,
+                "spring.hibernate.jpa.hibernate.ddl-auto" to "none",
+            )
+        }
 }
