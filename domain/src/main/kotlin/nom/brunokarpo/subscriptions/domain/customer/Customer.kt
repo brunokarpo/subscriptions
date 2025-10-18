@@ -1,13 +1,11 @@
 package nom.brunokarpo.subscriptions.domain.customer
 
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
-import nom.brunokarpo.subscriptions.domain.customer.Customer.Companion.create
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
-import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscriptions
 import nom.brunokarpo.subscriptions.domain.product.Product
 import java.time.ZonedDateTime
 
@@ -17,12 +15,15 @@ class Customer private constructor(
 	val email: String
 ) : AggregateRoot() {
 
-	private val subscriptions: Subscriptions = Subscriptions()
+	private val _subscriptions = mutableListOf<Subscription>()
 
 	var active = false
 		private set
 	var activeUntil: ZonedDateTime? = null
 		private set
+
+    val subscriptions: List<Subscription>
+        get() = _subscriptions.toList()
 
 	companion object {
 		/**
@@ -44,7 +45,7 @@ class Customer private constructor(
 			it.active = active
 			it.activeUntil = activeUntil
 
-			products.map { product -> it.subscriptions.add(product) }
+			products.map { product -> it._subscriptions.add(Subscription(product)) }
 		}
 
 		fun create(name: String, email: String): Customer {
@@ -58,7 +59,7 @@ class Customer private constructor(
 		if (!this.active) {
 			throw CustomerNotActiveException(customerId = this.id)
 		}
-		subscriptions.add(product)
+		_subscriptions.add(Subscription(product = product))
 		this.recordEvent(ProductSubscribed(domainId = this.id, productId = product.id))
 	}
 
@@ -72,10 +73,6 @@ class Customer private constructor(
 		if (!this.active) {
 			throw CustomerNotActiveException(customerId = this.id)
 		}
-		return ActivationKey(
-			email = this.email,
-			products = this.subscriptions.productNames(),
-			validUntil = this.activeUntil!!
-		)
+		return ActivationKey.of(customer = this)
 	}
 }
