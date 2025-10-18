@@ -2,6 +2,7 @@ package nom.brunokarpo.subscriptions.infra.database.repositories
 
 import kotlinx.coroutines.test.runTest
 import nom.brunokarpo.subscriptions.domain.product.Product
+import nom.brunokarpo.subscriptions.domain.product.ProductId
 import nom.brunokarpo.subscriptions.domain.product.ProductRepository
 import nom.brunokarpo.subscriptions.infra.database.DatabaseConfigurationTest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -65,4 +66,26 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 		assertEquals("database product", product.name)
 		assertEquals("79e9eb45-2835-49c8-ad3b-c951b591bc7f", product.id.value().toString())
 	}
+
+    @Test
+    fun `should find product by identifier`() = runTest {
+        loadDatabase("/create_products.sql")
+
+        val productId = ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7b")
+
+        val product = sut.findById(productId)
+
+        assertNotNull(product)
+        assertEquals("database product 5", product.name)
+        assertEquals(productId, product.id)
+    }
+
+    @Test
+    fun `should return null when product not found by identifier`() = runTest {
+        val productId = ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7b")
+
+        val product = sut.findById(productId)
+
+        assertNull(product)
+    }
 }
