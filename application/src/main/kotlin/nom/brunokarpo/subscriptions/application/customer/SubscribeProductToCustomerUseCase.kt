@@ -19,16 +19,14 @@ class SubscribeProductToCustomerUseCase(
         val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
         val product = productRepository.findByName(input.productName) ?: throw ProductNotExistsException(input.productName)
 
-        customer.subscribe(product)
+        val subscription = customer.subscribe(product)
 
         customerRepository.save(customer)
 
-        val activationKey = customer.activationKey()
-
         return Output(
-            email = activationKey.email,
-            products = activationKey.products.toList(),
-            validUntil = activationKey.validUntil.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            email = customer.email,
+            productName = product.name,
+            subscriptionStatus = subscription.status.name,
         )
     }
 
@@ -39,7 +37,7 @@ class SubscribeProductToCustomerUseCase(
 
     class Output(
         val email: String,
-        val products: List<String>,
-        val validUntil: String,
+        val productName: String,
+        val subscriptionStatus: String,
     )
 }

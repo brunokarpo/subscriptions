@@ -60,8 +60,8 @@ class CustomersController(
         val customerDto =
             ProductSubscriptionCustomerDto(
                 email = output.email,
-                products = output.products.toSet(),
-                validUntil = output.validUntil,
+                productName = output.productName,
+                subscriptionStatus = output.subscriptionStatus,
             )
 
         return ResponseEntity.status(201).body(customerDto)

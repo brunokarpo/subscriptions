@@ -4,6 +4,7 @@ import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
 import org.junit.jupiter.api.Assertions.*
@@ -33,7 +34,7 @@ class CustomerTest {
     }
 
     @Test
-    fun `should subscribe a product and generate an activation key`() {
+    fun `should subscribe a product`() {
         // given
         val customerId = CustomerId.unique()
         val expectedName = "Test"
@@ -47,15 +48,14 @@ class CustomerTest {
         val product = Product.create(productId = productId, name = expectedProductName)
 
         // when
-        customer.subscribe(product)
+        val subscription = customer.subscribe(product)
 
         // then
-        val activationKey: ActivationKey = customer.activationKey()
-        assertNotNull(activationKey)
-        assertEquals(expectedEmail, activationKey.email)
-        assertContains(activationKey.products, expectedProductName)
-        assertEquals(1, activationKey.products.size)
+        assertEquals(1, customer.subscriptions.size)
+        assertContains(customer.subscriptions, subscription)
+        assertEquals(SubscriptionStatus.REQUESTED, subscription.status)
 
+        // validate domain event
         val event = customer.domainEvents().firstOrNull { ev -> ev is ProductSubscribed } as ProductSubscribed
         assertNotNull(event)
         assertEquals(customerId, event.domainId)

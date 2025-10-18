@@ -54,6 +54,8 @@ class SubscribeProductToCustomerUseCaseTest {
             val product = Product.create(productId = productId, name = productName)
             coEvery { productRepository.findByName(productName) } returns product
 
+            val expectedSubscriptionStatus = "REQUESTED"
+
             // when
             val input =
                 SubscribeProductToCustomerUseCase.Input(
@@ -64,8 +66,8 @@ class SubscribeProductToCustomerUseCaseTest {
 
             // then
             assertEquals(customerEmail, output.email)
-            assertContains(output.products, productName)
-            assertNotNull(output.validUntil)
+            assertEquals(productName, output.productName)
+            assertEquals(expectedSubscriptionStatus, output.subscriptionStatus)
 
             coVerify(exactly = 1) { customerRepository.save(customer) }
         }

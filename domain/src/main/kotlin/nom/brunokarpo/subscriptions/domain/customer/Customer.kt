@@ -58,12 +58,14 @@ class Customer private constructor(
         }
     }
 
-    fun subscribe(product: Product) {
+    fun subscribe(product: Product): Subscription {
         if (!this.active) {
             throw CustomerNotActiveException(customerId = this.id)
         }
-        _subscriptions.add(Subscription.to(product = product))
+        val subscription = Subscription.to(product = product)
+        _subscriptions.add(subscription)
         this.recordEvent(ProductSubscribed(domainId = this.id, productId = product.id))
+        return subscription
     }
 
     fun activate() {

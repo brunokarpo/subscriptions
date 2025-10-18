@@ -6,6 +6,7 @@ import nom.brunokarpo.subscriptions.domain.product.ProductId
 class Subscription private constructor(
     val productId: ProductId,
     val productName: String,
+    val status: SubscriptionStatus = SubscriptionStatus.REQUESTED,
 ) {
     companion object {
         fun to(product: Product): Subscription = Subscription(productId = product.id, productName = product.name)

@@ -73,13 +73,12 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val productName = "PRODUCT_ID_1"
 
         val expectedEmail = "<EMAIL>"
-        val productName2 = "PRODUCT_ID_2"
 
         coEvery { subscribeProductToCustomerUseCase.execute(any()) } returns
             SubscribeProductToCustomerUseCase.Output(
                 email = expectedEmail,
-                products = listOf(productName, productName2),
-                validUntil = "2021-08-31",
+                productName = productName,
+                subscriptionStatus = "REQUESTED",
             )
 
         val productSubscriptionDto = ProductSubscriptionDto(productName = productName)
@@ -95,12 +94,10 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .expectBody()
             .jsonPath("$.email")
             .isEqualTo(expectedEmail)
-            .jsonPath("$.products[0]")
+            .jsonPath("$.productName")
             .isEqualTo(productName)
-            .jsonPath("$.products[1]")
-            .isEqualTo(productName2)
-            .jsonPath("$.validUntil")
-            .isEqualTo("2021-08-31")
+            .jsonPath("$.subscriptionStatus")
+            .isEqualTo("REQUESTED")
     }
 
     @Test
