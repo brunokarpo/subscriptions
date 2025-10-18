@@ -15,7 +15,7 @@ class Customer private constructor(
 	val email: String
 ) : AggregateRoot() {
 
-	private val _subscriptions = mutableListOf<Subscription>()
+	private val _subscriptions = mutableSetOf<Subscription>()
 
 	var active = false
 		private set
@@ -28,7 +28,7 @@ class Customer private constructor(
 	companion object {
 		/**
 		 * This method should only be used by the repository layer or test to construct the entity without generate any domain event.
-		 * For business logic purpose use #create(name: String, email: String) method
+		 * For business logic purposes use #create(name: String, email: String) method
 		 */
 		fun create(
 			id: CustomerId,
@@ -45,7 +45,7 @@ class Customer private constructor(
 			it.active = active
 			it.activeUntil = activeUntil
 
-			products.map { product -> it._subscriptions.add(Subscription(product)) }
+			products.map { product -> it._subscriptions.add(Subscription.to(product)) }
 		}
 
 		fun create(name: String, email: String): Customer {
@@ -59,7 +59,7 @@ class Customer private constructor(
 		if (!this.active) {
 			throw CustomerNotActiveException(customerId = this.id)
 		}
-		_subscriptions.add(Subscription(product = product))
+		_subscriptions.add(Subscription.to(product = product))
 		this.recordEvent(ProductSubscribed(domainId = this.id, productId = product.id))
 	}
 
