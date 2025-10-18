@@ -4,10 +4,13 @@ import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.ZonedDateTime
@@ -130,5 +133,31 @@ class CustomerTest {
         assertNotNull(event)
         assertEquals(customerId, event.domainId)
         assertNotNull(event.occurredOn)
+    }
+
+    @Test
+    fun `should retrieve customer's subscriptions by status`() {
+        // given
+        val customerId = CustomerId.unique()
+        val customer = Customer.create(id = customerId, name = "Test", email = "<EMAIL>")
+        customer.activate()
+
+        val product1Id = ProductId.unique()
+        val product1Name = "Product 1"
+        val product1 = Product.create(productId = product1Id, name = product1Name)
+        customer.subscribe(product1)
+
+        val product2Id = ProductId.unique()
+        val product2Name = "Product 2"
+        val product2 = Product.create(productId = product2Id, name = product2Name)
+        customer.subscribe(product2)
+
+        // when
+        val result: List<Subscription> = customer.getSubscriptionByStatus(SubscriptionStatus.REQUESTED)
+
+        // then
+        assertEquals(2, result.size)
+        assertTrue(result.any { it.productId == product1Id })
+        assertTrue(result.any { it.productId == product2Id })
     }
 }

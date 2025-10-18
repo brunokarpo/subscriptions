@@ -6,6 +6,7 @@ import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.domain.product.Product
 import java.time.ZonedDateTime
 
@@ -67,6 +68,9 @@ class Customer private constructor(
         this.recordEvent(ProductSubscribed(domainId = this.id, productId = product.id))
         return subscription
     }
+
+    fun getSubscriptionByStatus(status: SubscriptionStatus): List<Subscription> =
+        this.subscriptions.filter { subscription -> subscription.status == status }
 
     fun activate() {
         this.active = true

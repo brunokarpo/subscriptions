@@ -146,9 +146,24 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
 
             assertEquals(3, customer.subscriptions.size)
 
-            assertNotNull(customer.subscriptions.firstOrNull { sub -> sub.productName == "database product 2" && sub.status == SubscriptionStatus.REQUESTED })
-            assertNotNull(customer.subscriptions.firstOrNull { sub -> sub.productName == "database product 3" && sub.status == SubscriptionStatus.REQUESTED })
-            assertNotNull(customer.subscriptions.firstOrNull { sub -> sub.productName == "database product 4" && sub.status == SubscriptionStatus.REQUESTED })
+            assertNotNull(
+                customer.subscriptions.firstOrNull { sub ->
+                    sub.productName == "database product 2" &&
+                        sub.status == SubscriptionStatus.REQUESTED
+                },
+            )
+            assertNotNull(
+                customer.subscriptions.firstOrNull { sub ->
+                    sub.productName == "database product 3" &&
+                        sub.status == SubscriptionStatus.REQUESTED
+                },
+            )
+            assertNotNull(
+                customer.subscriptions.firstOrNull { sub ->
+                    sub.productName == "database product 4" &&
+                        sub.status == SubscriptionStatus.REQUESTED
+                },
+            )
 
             // verify if any domain event was generated
             assertTrue(customer.domainEvents().isEmpty())
