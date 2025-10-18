@@ -16,7 +16,7 @@ class CreateNewProductUseCase(
 			throw ProductUniqueNameException(input.name)
 		}
 
-		val product = Product.create(input.name)
+		val product = Product.create(name = input.name)
 
 		productRepository.save(product)
 

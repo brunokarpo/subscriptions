@@ -13,7 +13,7 @@ class ProductMapper {
 	lateinit var id: UUID
 	lateinit var name: String
 
-	fun toDomain(): Product = Product.create(ProductId.from(id), name)
+	fun toDomain(): Product = Product.create(productId = ProductId.from(id), name = name, emitEvent = false)
 
 	companion object {
 		fun from(product: Product): ProductMapper = ProductMapper().also {

@@ -20,7 +20,7 @@ class ProductRepositoryTest : DatabaseConfigurationTest() {
 		// given
 		val name = "Product 1"
 
-		val product = Product.create(name)
+		val product = Product.create(name = name)
 
 		// when
 		sut.save(product)

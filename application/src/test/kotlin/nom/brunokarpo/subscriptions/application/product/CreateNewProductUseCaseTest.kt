@@ -60,7 +60,7 @@ class CreateNewProductUseCaseTest {
 
 		coEvery {
 			productRepository.findByName(productName)
-		} returns Product.create(productName)
+		} returns Product.create(name = productName)
 
 		// when
 		val exception = assertThrows<ProductUniqueNameException> {

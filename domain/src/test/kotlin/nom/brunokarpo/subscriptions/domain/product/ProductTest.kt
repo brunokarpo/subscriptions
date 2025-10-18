@@ -13,7 +13,7 @@ class ProductTest {
 		val name = "Product 1"
 
 		// when
-		val product = Product.create(name)
+		val product = Product.create(name = name)
 
 		// then
 		assertNotNull(product.id)
@@ -25,4 +25,19 @@ class ProductTest {
 		assertNotNull(event.occurredOn)
 		assertEquals(name, event.name)
 	}
+
+    @Test
+    fun `should create a product without generate creation event`() {
+        // given
+        val productId = ProductId.unique()
+        val name = "Product 1"
+
+        // when
+        val product: Product = Product.create(productId = productId, name = name, emitEvent = false)
+
+        // then
+        assertEquals(productId, product.id)
+        assertEquals(name, product.name)
+        assertEquals(0, product.domainEvents().size)
+    }
 }
