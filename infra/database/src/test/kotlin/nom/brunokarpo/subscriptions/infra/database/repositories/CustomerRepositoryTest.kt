@@ -16,135 +16,141 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 class CustomerRepositoryTest : DatabaseConfigurationTest() {
+    @Autowired
+    private lateinit var sut: CustomerRepository
 
-	@Autowired
-	private lateinit var sut: CustomerRepository
+    @Test
+    fun `should save new customer`() =
+        runTest {
+            // given
+            val customerId = CustomerId.unique()
+            val expectedName = "<NAME>"
+            val expectedEmail = "<EMAIL>"
 
-	@Test
-	fun `should save new customer`() = runTest {
-		// given
-		val customerId = CustomerId.unique()
-		val expectedName = "<NAME>"
-		val expectedEmail = "<EMAIL>"
+            // when
+            val customer = Customer.create(id = customerId, name = expectedName, email = expectedEmail)
+            sut.save(customer)
 
-		// when
-		val customer = Customer.create(id = customerId, name = expectedName, email = expectedEmail)
-		sut.save(customer)
+            // then
+            val result = sut.findByEmail(expectedEmail)
+            assertNotNull(result)
+            assertEquals(customerId, result?.id)
+            assertEquals(expectedName, result?.name)
+            assertEquals(expectedEmail, result?.email)
+        }
 
-		// then
-		val result = sut.findByEmail(expectedEmail)
-		assertNotNull(result)
-		assertEquals(customerId, result?.id)
-		assertEquals(expectedName, result?.name)
-		assertEquals(expectedEmail, result?.email)
-	}
+    @Test
+    fun `should find customer by email`() =
+        runTest {
+            loadDatabase("/create_customers.sql")
 
-	@Test
-	fun `should find customer by email`() = runTest {
-		loadDatabase("/create_customers.sql")
+            val expectedId = UUID.fromString("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
+            val expectedName = "John Doe"
+            val expectedEmail = "john@email.com"
+            val expectedActive = true
+            val expectedEndAt = ZonedDateTime.parse("2021-08-31T23:59:59Z")
 
-		val expectedId = UUID.fromString("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
-		val expectedName = "John Doe"
-		val expectedEmail = "john@email.com"
-		val expectedActive = true
-		val expectedEndAt = ZonedDateTime.parse("2021-08-31T23:59:59Z")
+            val customer = sut.findByEmail(expectedEmail)
 
-		val customer = sut.findByEmail(expectedEmail)
+            assertNotNull(customer)
+            assertEquals(expectedId, customer?.id?.value())
+            assertEquals(expectedName, customer?.name)
+            assertEquals(expectedEmail, customer?.email)
+            assertEquals(expectedActive, customer?.active)
+            assertEquals(expectedEndAt, customer?.activeUntil)
+        }
 
-		assertNotNull(customer)
-		assertEquals(expectedId, customer?.id?.value())
-		assertEquals(expectedName, customer?.name)
-		assertEquals(expectedEmail, customer?.email)
-		assertEquals(expectedActive, customer?.active)
-		assertEquals(expectedEndAt, customer?.activeUntil)
-	}
+    @Test
+    fun `should return null when customer email does not exists`() =
+        runTest {
+            val email = "<EMAIL>"
 
-	@Test
-	fun `should return null when customer email does not exists`() = runTest {
-		val email = "<EMAIL>"
+            val customer = sut.findByEmail(email)
 
-		val customer = sut.findByEmail(email)
+            assertNull(customer)
+        }
 
-		assertNull(customer)
-	}
+    @Test
+    fun `should find customer by id`() =
+        runTest {
+            loadDatabase("/create_customers.sql")
 
-	@Test
-	fun `should find customer by id`() = runTest {
-		loadDatabase("/create_customers.sql")
+            val expectedId = CustomerId.from("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
+            val expectedName = "John Doe"
+            val expectedEmail = "john@email.com"
+            val expectedActive = true
+            val expectedEndAt = ZonedDateTime.parse("2021-08-31T23:59:59Z")
 
-		val expectedId = CustomerId.from("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
-		val expectedName = "John Doe"
-		val expectedEmail = "john@email.com"
-		val expectedActive = true
-		val expectedEndAt = ZonedDateTime.parse("2021-08-31T23:59:59Z")
+            val customer = sut.findById(expectedId)
 
-		val customer = sut.findById(expectedId)
+            assertNotNull(customer)
+            assertEquals(expectedId, customer?.id)
+            assertEquals(expectedName, customer?.name)
+            assertEquals(expectedEmail, customer?.email)
+            assertEquals(expectedActive, customer?.active)
+            assertEquals(expectedEndAt, customer?.activeUntil)
+        }
 
-		assertNotNull(customer)
-		assertEquals(expectedId, customer?.id)
-		assertEquals(expectedName, customer?.name)
-		assertEquals(expectedEmail, customer?.email)
-		assertEquals(expectedActive, customer?.active)
-		assertEquals(expectedEndAt, customer?.activeUntil)
-	}
+    @Test
+    fun `should return null when customer not exists by id`() =
+        runTest {
+            val expectedId = CustomerId.from("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
 
-	@Test
-	fun `should return null when customer not exists by id`() = runTest {
-		val expectedId = CustomerId.from("d0fe82e3-766f-4c95-ad91-7ee7fd450993")
+            val customer = sut.findById(expectedId)
 
-		val customer = sut.findById(expectedId)
+            assertNull(customer)
+        }
 
-		assertNull(customer)
-	}
+    @Test
+    fun `should update active and active untl of existent customer`() =
+        runTest {
+            loadDatabase("/create_customers.sql")
 
-	@Test
-	fun `should update active and active untl of existent customer`() = runTest {
-		loadDatabase("/create_customers.sql")
+            // given
+            val expectedEmail = "sara@email.com"
+            val customer = sut.findByEmail(expectedEmail)
+            assertNotNull(customer)
+            assertFalse(customer!!.active)
+            assertEquals(ZonedDateTime.parse("2021-08-31T23:59:59Z"), customer.activeUntil)
 
-		// given
-		val expectedEmail = "sara@email.com"
-		val customer = sut.findByEmail(expectedEmail)
-		assertNotNull(customer)
-		assertFalse(customer!!.active)
-		assertEquals(ZonedDateTime.parse("2021-08-31T23:59:59Z"), customer.activeUntil)
+            // when
+            customer.activate()
+            sut.save(customer)
 
-		// when
-		customer.activate()
-		sut.save(customer)
+            // then
+            val result = sut.findByEmail(expectedEmail)
+            assertNotNull(result)
+            assertEquals(customer.id, result?.id)
+            assertEquals(customer.name, result?.name)
+            assertEquals(customer.email, result?.email)
+            assertTrue(result?.active ?: false)
+            assertTrue(result?.activeUntil!!.isAfter(ZonedDateTime.now()))
+        }
 
-		// then
-		val result = sut.findByEmail(expectedEmail)
-		assertNotNull(result)
-		assertEquals(customer.id, result?.id)
-		assertEquals(customer.name, result?.name)
-		assertEquals(customer.email, result?.email)
-		assertTrue(result?.active ?: false)
-		assertTrue(result?.activeUntil!!.isAfter(ZonedDateTime.now()))
-	}
+    @Test
+    fun `should load the subscriptions from database`() =
+        runTest {
+            loadDatabase("/create_customers.sql")
+            loadDatabase("/create_subscriptions.sql")
+            loadDatabase("/create_products.sql")
 
-	@Test
-	fun `should load the subscriptions from database`() = runTest {
-		loadDatabase("/create_customers.sql")
-		loadDatabase("/create_subscriptions.sql")
-		loadDatabase("/create_products.sql")
+            // given
+            val expectedEmail = "alice@email.com"
 
-		// given
-		val expectedEmail = "alice@email.com"
+            // when
+            val customer = sut.findByEmail(expectedEmail)
 
-		// when
-		val customer = sut.findByEmail(expectedEmail)
+            // then
+            assertNotNull(customer!!)
 
-		// then
-		assertNotNull(customer!!)
+            val activationKey = customer.activationKey()
+            assertNotNull(activationKey)
+            assertEquals(3, activationKey.products.size)
+            assertTrue(activationKey.products.contains("database product 2"))
+            assertTrue(activationKey.products.contains("database product 3"))
+            assertTrue(activationKey.products.contains("database product 4"))
 
-		val activationKey = customer.activationKey()
-		assertNotNull(activationKey)
-		assertEquals(3, activationKey.products.size)
-		assertTrue(activationKey.products.contains("database product 2"))
-		assertTrue(activationKey.products.contains("database product 3"))
-		assertTrue(activationKey.products.contains("database product 4"))
-
-		// verify if any domain event was generated
-		assertTrue(customer.domainEvents().isEmpty())
-	}
+            // verify if any domain event was generated
+            assertTrue(customer.domainEvents().isEmpty())
+        }
 }

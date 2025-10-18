@@ -10,18 +10,17 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class UseCaseConfigurations {
-
-	@Bean
-	fun createNewProductUseCase(productRepository: ProductRepository): CreateNewProductUseCase {
-		return CreateNewProductUseCase(productRepository = productRepository)
-	}
-
-	@Bean
-	fun createNewCustomerUseCase(customerRepository: CustomerRepository): CreateNewCustomerUseCase =
-		CreateNewCustomerUseCase(customerRepository = customerRepository)
-    
     @Bean
-    fun subscribeProductToCustomerUseCase(customerRepository: CustomerRepository, productRepository: ProductRepository) =
-        SubscribeProductToCustomerUseCase(customerRepository = customerRepository, productRepository = productRepository)
+    fun createNewProductUseCase(productRepository: ProductRepository): CreateNewProductUseCase =
+        CreateNewProductUseCase(productRepository = productRepository)
 
+    @Bean
+    fun createNewCustomerUseCase(customerRepository: CustomerRepository): CreateNewCustomerUseCase =
+        CreateNewCustomerUseCase(customerRepository = customerRepository)
+
+    @Bean
+    fun subscribeProductToCustomerUseCase(
+        customerRepository: CustomerRepository,
+        productRepository: ProductRepository,
+    ) = SubscribeProductToCustomerUseCase(customerRepository = customerRepository, productRepository = productRepository)
 }

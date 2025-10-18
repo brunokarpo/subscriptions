@@ -19,60 +19,61 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class CustomerActivateUseCaseTest {
+    private lateinit var customerRepository: CustomerRepository
 
-	private lateinit var customerRepository: CustomerRepository
+    private lateinit var sut: CustomerActivateUseCase
 
-	private lateinit var sut: CustomerActivateUseCase
+    @BeforeEach
+    fun setUp() {
+        customerRepository = mockk(relaxed = true)
 
-	@BeforeEach
-	fun setUp() {
-		customerRepository = mockk(relaxed = true)
+        sut = CustomerActivateUseCase(customerRepository = customerRepository)
+    }
 
-		sut = CustomerActivateUseCase(customerRepository = customerRepository)
-	}
+    @Test
+    fun `should activate customer with customer id`() =
+        runTest {
+            // given
+            val customerId = CustomerId.unique()
 
-	@Test
-	fun `should activate customer with customer id`() = runTest {
-		// given
-		val customerId = CustomerId.unique()
+            val customer = Customer.create(id = customerId, name = "Customer Name", email = "<EMAIL>")
+            assertFalse(customer.active)
 
-		val customer = Customer.create(id = customerId, name = "Customer Name", email = "<EMAIL>")
-		assertFalse(customer.active)
+            coEvery { customerRepository.findById(customerId) } returns customer
 
-		coEvery { customerRepository.findById(customerId) } returns customer
+            // when
+            val input = CustomerActivateUseCase.Input(customerId = customerId.toString())
 
-		// when
-		val input = CustomerActivateUseCase.Input(customerId = customerId.toString())
+            val output = sut.execute(input)
 
-		val output = sut.execute(input)
+            // then
+            assertNotNull(output)
+            assertEquals(customerId.toString(), output.customerId)
+            assertEquals(customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), output.activeUntil)
 
-		// then
-		assertNotNull(output)
-		assertEquals(customerId.toString(), output.customerId)
-		assertEquals(customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), output.activeUntil)
+            val slot = slot<Customer>()
+            coVerify(exactly = 1) {
+                customerRepository.save(capture(slot))
+            }
 
-		val slot = slot<Customer>()
-		coVerify(exactly = 1) {
-			customerRepository.save(capture(slot))
-		}
+            val savedCustomer = slot.captured
+            assertTrue(savedCustomer.active)
+        }
 
-		val savedCustomer = slot.captured
-		assertTrue(savedCustomer.active)
-	}
+    @Test
+    fun `should not activate customer that does not exists`() =
+        runTest {
+            // given a customer that does not exist on repository
+            val customerId = CustomerId.unique()
+            coEvery { customerRepository.findById(customerId) } returns null
 
-	@Test
-	fun `should not activate customer that does not exists`() = runTest {
-		// given a customer that does not exist on repository
-		val customerId = CustomerId.unique()
-		coEvery { customerRepository.findById(customerId) } returns null
+            // when call the use case to activate the customer
+            val input = CustomerActivateUseCase.Input(customerId = customerId.toString())
+            val exception = assertThrows<CustomerByIdNotFoundException> { sut.execute(input) }
 
-		// when call the use case to activate the customer
-		val input = CustomerActivateUseCase.Input(customerId = customerId.toString())
-		val exception = assertThrows<CustomerByIdNotFoundException> { sut.execute(input) }
-
-		// then validate if the exception was thrown and the message informs that customer by id does not exist
-		assertNotNull(exception)
-		assertEquals("Customer with id '$customerId' does not exists!", exception.message)
-		coVerify(exactly = 0) { customerRepository.save(any()) }
-	}
+            // then validate if the exception was thrown and the message informs that customer by id does not exist
+            assertNotNull(exception)
+            assertEquals("Customer with id '$customerId' does not exists!", exception.message)
+            coVerify(exactly = 0) { customerRepository.save(any()) }
+        }
 }

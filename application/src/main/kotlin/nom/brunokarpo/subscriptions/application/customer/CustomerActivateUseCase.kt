@@ -7,21 +7,28 @@ import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
 import java.time.format.DateTimeFormatter
 
 class CustomerActivateUseCase(
-	private val customerRepository: CustomerRepository
+    private val customerRepository: CustomerRepository,
 ) : UseCase<CustomerActivateUseCase.Input, CustomerActivateUseCase.Output> {
+    override suspend fun execute(input: Input): Output {
+        val customerId = CustomerId.from(input.customerId)
 
-	override suspend fun execute(input: Input): Output {
-		val customerId = CustomerId.from(input.customerId)
+        val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
+        customer.activate()
 
-		val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
-		customer.activate()
+        customerRepository.save(customer)
 
-		customerRepository.save(customer)
+        return Output(
+            customerId = customerId.toString(),
+            activeUntil = customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+        )
+    }
 
-		return Output(customerId = customerId.toString(), activeUntil = customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-	}
+    class Input(
+        val customerId: String,
+    )
 
-	class Input(val customerId: String)
-
-	class Output(val customerId: String, val activeUntil: String)
+    class Output(
+        val customerId: String,
+        val activeUntil: String,
+    )
 }

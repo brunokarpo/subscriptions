@@ -4,13 +4,13 @@ import nom.brunokarpo.subscriptions.domain.common.Identifier
 import java.util.UUID
 
 class ProductId private constructor(
-	id: UUID
-): Identifier<UUID>(id) {
+    id: UUID,
+) : Identifier<UUID>(id) {
+    companion object {
+        fun unique(): ProductId = ProductId(UUID.randomUUID())
 
-	companion object {
-		fun unique(): ProductId = ProductId(UUID.randomUUID())
-		fun from(id: String): ProductId = from(UUID.fromString(id))
-		fun from(uuid: UUID): ProductId = ProductId(uuid)
-	}
+        fun from(id: String): ProductId = from(UUID.fromString(id))
 
+        fun from(uuid: UUID): ProductId = ProductId(uuid)
+    }
 }

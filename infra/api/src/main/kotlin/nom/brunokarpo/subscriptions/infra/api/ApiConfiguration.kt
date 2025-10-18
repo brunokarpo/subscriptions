@@ -9,5 +9,4 @@ import org.springframework.web.reactive.config.EnableWebFlux
 @ComponentScan
 @Configuration
 @EnableWebFlux
-class ApiConfiguration {
-}
+class ApiConfiguration

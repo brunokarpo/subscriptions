@@ -19,55 +19,60 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/v1/customers")
 class CustomersController(
-	private val createNewCustomerUseCase: CreateNewCustomerUseCase,
-	private val subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase,
+    private val createNewCustomerUseCase: CreateNewCustomerUseCase,
+    private val subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase,
 ) {
+    @PostMapping
+    suspend fun createCustomer(
+        @RequestBody createCustomerDto: CreateCustomerDto,
+    ): ResponseEntity<CustomerDto> {
+        val input =
+            CreateNewCustomerUseCase.Input(
+                name = createCustomerDto.name,
+                email = createCustomerDto.email,
+            )
 
-	@PostMapping
-	suspend fun createCustomer(@RequestBody createCustomerDto: CreateCustomerDto): ResponseEntity<CustomerDto> {
-		val input = CreateNewCustomerUseCase.Input(
-			name = createCustomerDto.name,
-			email = createCustomerDto.email
-		)
+        val output = createNewCustomerUseCase.execute(input)
 
-		val output = createNewCustomerUseCase.execute(input)
+        val customerDto =
+            CustomerDto(
+                id = output.id,
+                name = output.name,
+                email = output.email,
+            )
 
-		val customerDto = CustomerDto(
-			id = output.id,
-			name = output.name,
-			email = output.email
-		)
+        return ResponseEntity.status(201).body(customerDto)
+    }
 
-		return ResponseEntity.status(201).body(customerDto)
-	}
+    @PostMapping("/{customerId}/products")
+    suspend fun subscribeProductToCustomer(
+        @RequestBody productSubscriptionDto: ProductSubscriptionDto,
+        @PathVariable customerId: String,
+    ): ResponseEntity<ProductSubscriptionCustomerDto> {
+        val input =
+            SubscribeProductToCustomerUseCase.Input(
+                customerId = customerId,
+                productName = productSubscriptionDto.productName,
+            )
 
-	@PostMapping("/{customerId}/products")
-	suspend fun subscribeProductToCustomer(
-		@RequestBody productSubscriptionDto: ProductSubscriptionDto,
-		@PathVariable customerId: String
-	): ResponseEntity<ProductSubscriptionCustomerDto> {
-		val input = SubscribeProductToCustomerUseCase.Input(
-			customerId = customerId,
-			productName = productSubscriptionDto.productName
-		)
+        val output = subscribeProductToCustomerUseCase.execute(input)
 
-		val output = subscribeProductToCustomerUseCase.execute(input)
+        val customerDto =
+            ProductSubscriptionCustomerDto(
+                email = output.email,
+                products = output.products.toSet(),
+                validUntil = output.validUntil,
+            )
 
-		val customerDto = ProductSubscriptionCustomerDto(
-			email = output.email,
-			products = output.products.toSet(),
-			validUntil = output.validUntil,
-		)
+        return ResponseEntity.status(201).body(customerDto)
+    }
 
-		return ResponseEntity.status(201).body(customerDto)
-	}
-
-
-	@ExceptionHandler(ApplicationException::class)
-	fun handleApplicationException(ex: ApplicationException): ResponseEntity<Map<String, String>> =
-		ResponseEntity.status(
-			HttpStatus.BAD_REQUEST
-		).body(
-			mapOf("message" to ex.message!!)
-		)
+    @ExceptionHandler(ApplicationException::class)
+    fun handleApplicationException(ex: ApplicationException): ResponseEntity<Map<String, String>> =
+        ResponseEntity
+            .status(
+                HttpStatus.BAD_REQUEST,
+            ).body(
+                mapOf("message" to ex.message!!),
+            )
 }

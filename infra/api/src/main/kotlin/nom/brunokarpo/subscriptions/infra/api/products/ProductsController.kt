@@ -15,30 +15,34 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/v1/products")
 class ProductsController(
-	private val createProductUseCase: CreateNewProductUseCase
+    private val createProductUseCase: CreateNewProductUseCase,
 ) {
+    @PostMapping
+    suspend fun createProduct(
+        @RequestBody createProductDto: CreateProductDto,
+    ): ResponseEntity<ProductDtoResponse> {
+        val input =
+            CreateNewProductUseCase.Input(
+                name = createProductDto.name,
+            )
 
-	@PostMapping
-	suspend fun createProduct(@RequestBody createProductDto: CreateProductDto): ResponseEntity<ProductDtoResponse> {
-		val input = CreateNewProductUseCase.Input(
-			name = createProductDto.name
-		)
+        val output = createProductUseCase.execute(input)
 
-		val output = createProductUseCase.execute(input)
+        val productDtoResponse =
+            ProductDtoResponse(
+                id = output.id,
+                name = output.name,
+            )
 
-		val productDtoResponse = ProductDtoResponse(
-			id = output.id,
-			name = output.name
-		)
+        return ResponseEntity.status(201).body(productDtoResponse)
+    }
 
-		return ResponseEntity.status(201).body(productDtoResponse)
-	}
-
-	@ExceptionHandler(ProductUniqueNameException::class)
-	suspend fun handleProductUniqueNameException(ex: ProductUniqueNameException): ResponseEntity<Map<String, String>> = ResponseEntity.status(
-		HttpStatus.BAD_REQUEST
-	).body(
-		mapOf("message" to ex.message!!)
-	)
-
+    @ExceptionHandler(ProductUniqueNameException::class)
+    suspend fun handleProductUniqueNameException(ex: ProductUniqueNameException): ResponseEntity<Map<String, String>> =
+        ResponseEntity
+            .status(
+                HttpStatus.BAD_REQUEST,
+            ).body(
+                mapOf("message" to ex.message!!),
+            )
 }

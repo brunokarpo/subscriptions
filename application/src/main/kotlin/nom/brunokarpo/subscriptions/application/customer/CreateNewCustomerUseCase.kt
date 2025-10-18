@@ -6,22 +6,28 @@ import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
 
 class CreateNewCustomerUseCase(
-	private val customerRepository: CustomerRepository
-): UseCase<CreateNewCustomerUseCase.Input, CreateNewCustomerUseCase.Output> {
+    private val customerRepository: CustomerRepository,
+) : UseCase<CreateNewCustomerUseCase.Input, CreateNewCustomerUseCase.Output> {
+    override suspend fun execute(input: Input): Output {
+        customerRepository.findByEmail(input.email)?.let {
+            throw CustomerUniqueEmailException(input.email)
+        }
 
-	override suspend fun execute(input: Input): Output {
-		customerRepository.findByEmail(input.email)?.let {
-			throw CustomerUniqueEmailException(input.email)
-		}
+        val customer = Customer.create(name = input.name, email = input.email)
 
-		val customer = Customer.create(name = input.name, email = input.email)
+        customerRepository.save(customer)
 
-		customerRepository.save(customer)
+        return Output(id = customer.id.toString(), name = customer.name, email = customer.email)
+    }
 
-		return Output(id = customer.id.toString(), name = customer.name, email = customer.email)
-	}
+    class Input(
+        val name: String,
+        val email: String,
+    )
 
-	class Input(val name: String, val email: String)
-
-	class Output(val id: String, val name: String, val email: String)
+    class Output(
+        val id: String,
+        val name: String,
+        val email: String,
+    )
 }

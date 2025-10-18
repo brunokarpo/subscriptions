@@ -3,20 +3,25 @@ package nom.brunokarpo.subscriptions.domain.product
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
 import nom.brunokarpo.subscriptions.domain.product.events.ProductCreated
 
-class Product private constructor(override val id: ProductId, val name: String) : AggregateRoot() {
+class Product private constructor(
+    override val id: ProductId,
+    val name: String,
+) : AggregateRoot() {
+    companion object {
+        fun create(
+            productId: ProductId = ProductId.unique(),
+            name: String,
+            emitEvent: Boolean = true,
+        ): Product {
+            val product = Product(productId, name)
 
-	companion object {
-		fun create(name: String): Product {
-			val product = Product(ProductId.unique(), name)
+            if (emitEvent) {
+                product.recordEvent(
+                    ProductCreated(domainId = product.id, name = product.name),
+                )
+            }
 
-			product.recordEvent(
-				ProductCreated(domainId = product.id, name = product.name)
-			)
-
-			return product
-		}
-
-		fun create(productId: ProductId, name: String): Product = Product(id = productId, name =  name)
-	}
-
+            return product
+        }
+    }
 }

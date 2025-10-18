@@ -1,4 +1,9 @@
 # Build application
+
+.PHONY: lint
+lint:
+	docker container run --rm --volume ${CURDIR}:/src kkopper/ktlint ktlint --format
+
 .PHONY: build
 build:
 	./mvnw clean package

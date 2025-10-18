@@ -1,8 +1,7 @@
 package nom.brunokarpo.subscriptions.domain.product
 
-interface ProductRepository {
+import nom.brunokarpo.subscriptions.domain.common.Repository
 
-	suspend fun save(product: Product)
-
-	suspend fun findByName(name: String): Product?
+interface ProductRepository : Repository<Product, ProductId> {
+    suspend fun findByName(name: String): Product?
 }

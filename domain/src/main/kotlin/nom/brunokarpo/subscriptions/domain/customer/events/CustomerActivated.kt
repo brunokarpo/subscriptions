@@ -5,6 +5,6 @@ import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import java.time.ZonedDateTime
 
 class CustomerActivated(
-	override val domainId: CustomerId,
-	override val occurredOn: ZonedDateTime = ZonedDateTime.now()
+    override val domainId: CustomerId,
+    override val occurredOn: ZonedDateTime = ZonedDateTime.now(),
 ) : DomainEvent
