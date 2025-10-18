@@ -1,6 +1,7 @@
 package nom.brunokarpo.subscriptions.infra.api.customers
 
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.usecases.ApplicationException
@@ -13,8 +14,10 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -26,6 +29,7 @@ class CustomersController(
     private val createNewCustomerUseCase: CreateNewCustomerUseCase,
     private val subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase,
     private val retrieveCustomersSubscriptionByStatusUseCase: RetrieveCustomersSubscriptionsRequestedUseCase,
+    private val customerActivateUseCase: CustomerActivateUseCase,
 ) {
     @PostMapping
     suspend fun createCustomer(
@@ -94,6 +98,22 @@ class CustomersController(
             )
 
         return ResponseEntity.ok(responseSubscriptionsStatusDto)
+    }
+
+    @PatchMapping("/{customerId}/activate")
+    suspend fun activateCustomer(
+        @PathVariable customerId: String,
+    ): ResponseEntity<ResponseCustomerDto> {
+        val input = CustomerActivateUseCase.Input(customerId = customerId)
+
+        val output = customerActivateUseCase.execute(input)
+
+        return ResponseEntity.ok(
+            ResponseCustomerDto(
+                id = output.customerId,
+                activeUntil = output.activeUntil,
+            ),
+        )
     }
 
     @ExceptionHandler(ApplicationException::class)

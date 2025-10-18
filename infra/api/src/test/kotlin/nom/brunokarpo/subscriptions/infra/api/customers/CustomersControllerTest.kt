@@ -2,6 +2,7 @@ package nom.brunokarpo.subscriptions.infra.api.customers
 
 import io.mockk.coEvery
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
@@ -190,5 +191,30 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .isEqualTo(productId2)
             .jsonPath("$.subscriptions[1].status")
             .isEqualTo("REQUESTED")
+    }
+
+    @Test
+    fun `should activate a customer by identifier`() {
+        val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+        val activeUntil = "2021-08-31T23:59:59"
+
+        coEvery { customerActivateUseCase.execute(any()) } returns
+            CustomerActivateUseCase.Output(
+                customerId = customerId,
+                activeUntil = activeUntil,
+            )
+
+        client
+            .patch()
+            .uri("/v1/customers/$customerId/activate")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(customerId)
+            .jsonPath("$.activeUntil")
+            .isEqualTo(activeUntil)
     }
 }
