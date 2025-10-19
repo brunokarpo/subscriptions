@@ -36,7 +36,7 @@ class Customer private constructor(
             email: String,
             active: Boolean = false,
             activeUntil: ZonedDateTime? = null,
-            products: List<Product> = listOf(),
+            subscription: List<Subscription> = listOf(),
         ): Customer =
             Customer(
                 id = id,
@@ -46,7 +46,7 @@ class Customer private constructor(
                 it.active = active
                 it.activeUntil = activeUntil
 
-                products.map { product -> it._subscriptions.add(Subscription.to(product)) }
+                it._subscriptions.addAll(subscription)
             }
 
         fun create(

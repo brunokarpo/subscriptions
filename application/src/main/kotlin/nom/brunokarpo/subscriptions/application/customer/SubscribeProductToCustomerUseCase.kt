@@ -7,7 +7,6 @@ import nom.brunokarpo.subscriptions.application.usecases.UseCase
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
 import nom.brunokarpo.subscriptions.domain.product.ProductRepository
-import java.time.format.DateTimeFormatter
 
 class SubscribeProductToCustomerUseCase(
     private val customerRepository: CustomerRepository,

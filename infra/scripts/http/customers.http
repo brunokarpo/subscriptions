@@ -6,3 +6,14 @@ Content-Type: application/json
   "name": "{{$random.name.name}}",
   "email": "{{$random.email}}"
 }
+
+###
+PATCH http://localhost:8080/v1/customers/0030eef0-1b46-4da0-ac54-64d8f36c3dd2/activate
+
+###
+POST http://localhost:8080/v1/customers/0030eef0-1b46-4da0-ac54-64d8f36c3dd2/products
+Content-Type: application/json
+
+{
+  "productName": "Fantastic Leather Knife"
+}

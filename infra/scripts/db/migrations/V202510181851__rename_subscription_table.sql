@@ -1,0 +1,1 @@
+alter table subscription rename to subscriptions;

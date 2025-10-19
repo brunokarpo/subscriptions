@@ -5,6 +5,8 @@ import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
+import nom.brunokarpo.subscriptions.domain.product.Product
+import nom.brunokarpo.subscriptions.domain.product.ProductId
 import nom.brunokarpo.subscriptions.infra.database.DatabaseConfigurationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -168,4 +170,26 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
             // verify if any domain event was generated
             assertTrue(customer.domainEvents().isEmpty())
         }
+
+    @Test
+    fun `should save customer with subscriptions`() = runTest {
+        loadDatabase("/create_products.sql")
+
+        val customerId = CustomerId.unique()
+        val name = "name"
+        val email = "email"
+        val customer = Customer.create(id = customerId, name = name, email = email)
+        customer.activate()
+
+        customer.subscribe(Product.create(ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7f"), ""))
+        customer.subscribe(Product.create(ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7e"), ""))
+
+        sut.save(customer)
+
+        val result = sut.findById(customerId)
+        assertNotNull(result)
+        assertEquals(2, result!!.subscriptions.size)
+        assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7f" } }
+        assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7e" } }
+    }
 }

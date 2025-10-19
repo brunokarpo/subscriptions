@@ -10,5 +10,10 @@ class Subscription private constructor(
 ) {
     companion object {
         fun to(product: Product): Subscription = Subscription(productId = product.id, productName = product.name)
+        fun from(
+            productId: ProductId,
+            productName: String = "",
+            status: SubscriptionStatus
+        ): Subscription = Subscription(productId, productName, status)
     }
 }

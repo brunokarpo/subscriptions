@@ -5,7 +5,7 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.JoinTable
-import jakarta.persistence.ManyToMany
+import jakarta.persistence.OneToMany
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import java.time.ZonedDateTime
@@ -20,13 +20,9 @@ class CustomerMapper {
     var active: Boolean? = null
     var activeUntil: ZonedDateTime? = null
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "subscription",
-        joinColumns = [JoinColumn(name = "customer_id")],
-        inverseJoinColumns = [JoinColumn(name = "product_id")],
-    )
-    var products: Set<ProductMapper> = setOf()
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "subscriptions", joinColumns = [JoinColumn(name = "customer_id")])
+    lateinit var subscriptions: MutableSet<SubscriptionMapper>
 
     companion object {
         fun from(customer: Customer): CustomerMapper =
@@ -36,6 +32,12 @@ class CustomerMapper {
                 it.email = customer.email
                 it.active = customer.active
                 it.activeUntil = customer.activeUntil
+                it.subscriptions = customer.subscriptions.map { subscription ->
+                    SubscriptionMapper.from(
+                        customer = customer,
+                        subscription = subscription
+                    )
+                }.toMutableSet()
             }
     }
 
@@ -46,6 +48,6 @@ class CustomerMapper {
             email = email,
             active = active ?: false,
             activeUntil = activeUntil,
-            products = products.map { product -> product.toDomain() },
+            subscription = subscriptions.map { it.toDomain() }.toList()
         )
 }
