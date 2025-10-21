@@ -8,12 +8,15 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:8080/v1/customers/0030eef0-1b46-4da0-ac54-64d8f36c3dd2/activate
+PATCH http://localhost:8080/v1/customers/300d5d28-0411-4eef-b24c-824911fd9f9d/activate
 
 ###
-POST http://localhost:8080/v1/customers/0030eef0-1b46-4da0-ac54-64d8f36c3dd2/products
+POST http://localhost:8080/v1/customers/300d5d28-0411-4eef-b24c-824911fd9f9d/products
 Content-Type: application/json
 
 {
-  "productName": "Fantastic Leather Knife"
+  "productName": "Practical Aluminum Shirt"
 }
+
+###
+GET http://localhost:8080/v1/customers/300d5d28-0411-4eef-b24c-824911fd9f9d/subscriptions?status=REQUESTED

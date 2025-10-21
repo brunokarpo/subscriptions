@@ -34,6 +34,7 @@ class CustomerDatabaseRepository(
     }
 
     private suspend fun saveSubscription(customer: Customer, subscription: Subscription) {
+        // TODO: add conflict strategy to avoid duplicated entries
         val sql = """
             INSERT INTO subscriptions (customer_id, product_id, status)
             VALUES (:customer_id, :product_id, :status)

@@ -87,6 +87,7 @@ class CustomersController(
 
         val responseSubscriptionsStatusDto =
             ResponseSubscriptionsStatusDto(
+                // TODO: add customer name, email, and product name
                 customerId = output.customerId,
                 subscriptions =
                     output.subscriptions.map {

@@ -19,6 +19,7 @@ class CustomerActivateUseCase(
 
         return Output(
             customerId = customerId.toString(),
+            // TODO("add name and email to show in the API")
             activeUntil = customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         )
     }

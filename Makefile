@@ -27,3 +27,7 @@ build-image: build-no-test
 run-image:
 	docker compose up -d
 	docker container run --rm --name subscription-app --network host --publish 8080:8080 --publish 8081:8081 nom.brunokarpo/subscriptions:local
+
+.PHONY: shutdown-environment
+shutdown-environment:
+	docker compose down
