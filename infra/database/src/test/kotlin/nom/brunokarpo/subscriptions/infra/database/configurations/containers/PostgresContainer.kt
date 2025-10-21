@@ -9,7 +9,7 @@ import org.testcontainers.junit.jupiter.Container
 private const val DATABASE_VERSION = "postgres:17-alpine"
 private const val PORT = 5432
 private const val DATABASE_NAME = "subscriptions-db"
-private const val USERNAME = "drugstore-app"
+private const val USERNAME = "subscriptions-app"
 private const val PASSWORD = USERNAME
 private const val MIGRATION_FILES = "../scripts/db/migrations"
 
@@ -48,6 +48,8 @@ object PostgresContainer {
                 "spring.datasource.username" to container.username,
                 "spring.datasource.password" to container.password,
                 "spring.hibernate.jpa.hibernate.ddl-auto" to "none",
+                "spring.jpa.show-sql" to "true",
+                "spring.jpa.properties.hibernate.format_sql" to "true"
             )
         }
 }

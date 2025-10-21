@@ -2,6 +2,7 @@ package nom.brunokarpo.subscriptions.infra.database.jpa.entities
 
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
 import java.util.UUID
@@ -11,6 +12,9 @@ class ProductMapper {
     @Id
     lateinit var id: UUID
     lateinit var name: String
+
+    @OneToMany(mappedBy = "product")
+    lateinit var subscriptions: MutableSet<SubscriptionMapper>
 
     fun toDomain(): Product = Product.create(productId = ProductId.from(id), name = name, emitEvent = false)
 

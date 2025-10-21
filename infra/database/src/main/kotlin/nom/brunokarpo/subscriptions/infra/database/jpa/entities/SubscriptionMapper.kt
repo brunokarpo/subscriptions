@@ -8,19 +8,19 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.MapsId
-import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.domain.product.ProductId
+import java.util.UUID
 
 @Embeddable
 class SubscriptionId {
 
     @Column(name = "customer_id", nullable = false)
-    lateinit var customerId: String
+    var customerId: UUID? = null
 
     @Column(name = "product_id", nullable = false)
-    lateinit var productId: String
+    var productId: UUID? = null
 }
 
 @Entity(name = "subscriptions")
@@ -43,19 +43,18 @@ class SubscriptionMapper {
     lateinit var status: String
 
     companion object {
-        fun from(customer: Customer, subscription: Subscription): SubscriptionMapper {
+        fun from(customer: CustomerMapper, subscription: Subscription): SubscriptionMapper {
             return SubscriptionMapper().also {
-                it.id = SubscriptionId().also { subscriptionId ->
-                    subscriptionId.customerId = customer.id.toString()
-                    subscriptionId.productId = subscription.productId.toString()
-                }
+                it.customer = customer
+                it.product = ProductMapper().also { p -> p.id = subscription.productId.value() }
                 it.status = subscription.status.name
             }
         }
     }
 
     fun toDomain(): Subscription = Subscription.from(
-        productId = id.productId.let { productId -> ProductId.from(productId) },
+        productId = ProductId.from(product.id),
+        productName = product.name,
         status = SubscriptionStatus.valueOf(status)
     )
 }

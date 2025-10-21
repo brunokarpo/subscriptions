@@ -3,8 +3,6 @@ package nom.brunokarpo.subscriptions.infra.database.jpa.entities
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.JoinTable
 import jakarta.persistence.OneToMany
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
@@ -20,8 +18,7 @@ class CustomerMapper {
     var active: Boolean? = null
     var activeUntil: ZonedDateTime? = null
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "subscriptions", joinColumns = [JoinColumn(name = "customer_id")])
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "customer")
     lateinit var subscriptions: MutableSet<SubscriptionMapper>
 
     companion object {
@@ -34,7 +31,7 @@ class CustomerMapper {
                 it.activeUntil = customer.activeUntil
                 it.subscriptions = customer.subscriptions.map { subscription ->
                     SubscriptionMapper.from(
-                        customer = customer,
+                        customer = it,
                         subscription = subscription
                     )
                 }.toMutableSet()
