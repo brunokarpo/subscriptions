@@ -47,9 +47,6 @@ object PostgresContainer {
                 "spring.datasource.url" to container.jdbcUrl,
                 "spring.datasource.username" to container.username,
                 "spring.datasource.password" to container.password,
-                "spring.hibernate.jpa.hibernate.ddl-auto" to "none",
-                "spring.jpa.show-sql" to "true",
-                "spring.jpa.properties.hibernate.format_sql" to "true"
             )
         }
 }
