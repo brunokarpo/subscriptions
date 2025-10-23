@@ -34,10 +34,10 @@ class CustomerDatabaseRepository(
     }
 
     private suspend fun saveSubscription(customer: Customer, subscription: Subscription) {
-        // TODO: add conflict strategy to avoid duplicated entries
         val sql = """
             INSERT INTO subscriptions (customer_id, product_id, status)
             VALUES (:customer_id, :product_id, :status)
+            ON CONFLICT (customer_id, product_id) DO NOTHING
         """.trimIndent()
         val params = mapOf(
             "customer_id" to customer.id.value(),

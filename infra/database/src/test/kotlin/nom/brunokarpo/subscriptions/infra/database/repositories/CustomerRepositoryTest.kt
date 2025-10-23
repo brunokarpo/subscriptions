@@ -192,4 +192,27 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
         assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7f" } }
         assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7e" } }
     }
+
+    @Test
+    fun `should update subscriptions when there was saved previously`() = runTest {
+        loadDatabase("/create_products.sql")
+
+        val customerId = CustomerId.unique()
+        val name = "name"
+        val email = "email"
+        val customer = Customer.create(id = customerId, name = name, email = email)
+        customer.activate()
+
+        customer.subscribe(Product.create(ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7f"), ""))
+        sut.save(customer)
+
+        customer.subscribe(Product.create(ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7d"), ""))
+        sut.save(customer)
+
+        val result = sut.findById(customerId)
+        assertNotNull(result)
+        assertEquals(2, result!!.subscriptions.size)
+        assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7f" } }
+        assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7d" } }
+    }
 }
