@@ -15,7 +15,7 @@ class ActivateSubscriptionUseCase(
     @Throws(SubscriptionNotFoundForProductIdException::class)
     override suspend fun execute(input: Input): Output {
         val customerId = CustomerId.from(input.customerId)
-        val customer = customerRepository.findById(customerId)!! // TODO: handle when customer is not found
+        val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
 
         val productId = ProductId.from(input.productId)
 
