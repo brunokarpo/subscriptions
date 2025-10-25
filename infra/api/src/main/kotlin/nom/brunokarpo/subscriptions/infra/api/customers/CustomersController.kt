@@ -104,6 +104,8 @@ class CustomersController(
         return ResponseEntity.ok(responseSubscriptionsStatusDto)
     }
 
+    // TODO: criar endpoint para ativar assinatura (PATCH /customers/{customerId}/subscriptions/{productId}/activate)
+
     @PatchMapping("/{customerId}/activate")
     suspend fun activateCustomer(
         @PathVariable customerId: String,

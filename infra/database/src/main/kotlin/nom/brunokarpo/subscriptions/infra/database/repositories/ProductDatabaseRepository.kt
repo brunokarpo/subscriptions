@@ -32,7 +32,7 @@ class ProductDatabaseRepository(
         )
         return jdbcTemplate.query(sql ,params) { rs, _ ->
             Product.create(
-                productId = ProductId.from(rs.getObject("id", UUID::class.java)),
+                id = ProductId.from(rs.getObject("id", UUID::class.java)),
                 name = rs.getString("name")
             )
         }.firstOrNull()
@@ -47,7 +47,7 @@ class ProductDatabaseRepository(
         )
         return jdbcTemplate.query(sql ,params) { rs, _ ->
             Product.create(
-                productId = ProductId.from(rs.getObject("id", UUID::class.java)),
+                id = ProductId.from(rs.getObject("id", UUID::class.java)),
                 name = rs.getString("name")
             )
         }.firstOrNull()

@@ -9,11 +9,11 @@ class Product private constructor(
 ) : AggregateRoot() {
     companion object {
         fun create(
-            productId: ProductId = ProductId.unique(),
+            id: ProductId = ProductId.unique(),
             name: String,
             emitEvent: Boolean = true,
         ): Product {
-            val product = Product(productId, name)
+            val product = Product(id, name)
 
             if (emitEvent) {
                 product.recordEvent(

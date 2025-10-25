@@ -39,12 +39,12 @@ class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
 
             val product1Id = ProductId.unique()
             val product1Name = "Product 1"
-            val product1 = Product.create(productId = product1Id, name = product1Name)
+            val product1 = Product.create(id = product1Id, name = product1Name)
             customer.subscribe(product1)
 
             val product2Id = ProductId.unique()
             val product2Name = "Product 2"
-            val product2 = Product.create(productId = product2Id, name = product2Name)
+            val product2 = Product.create(id = product2Id, name = product2Name)
             customer.subscribe(product2)
 
             coEvery { repository.findById(customerId) } returns customer
