@@ -152,6 +152,8 @@ class CustomersControllerTest : ApiConfigurationTest() {
     @Test
     fun `should list customer subscription by status`() {
         val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+        val customerName = "Customer Name"
+        val customerEmail = "customer@email.com"
         val productId1 = "PRODUCT_ID_1"
         val productId2 = "PRODUCT_ID_2"
 
@@ -160,6 +162,8 @@ class CustomersControllerTest : ApiConfigurationTest() {
         } returns
                 RetrieveCustomersSubscriptionsRequestedUseCase.Output(
                     customerId = customerId,
+                    customerName = customerName,
+                    customerEmail = customerEmail,
                     subscriptions =
                         listOf(
                             RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
@@ -183,6 +187,10 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .expectBody()
             .jsonPath("$.customerId")
             .isEqualTo(customerId)
+            .jsonPath("$.name")
+            .isEqualTo(customerName)
+            .jsonPath("$.email")
+            .isEqualTo(customerEmail)
             .jsonPath("$.subscriptions[0].productId")
             .isEqualTo(productId1)
             .jsonPath("$.subscriptions[0].status")

@@ -16,6 +16,8 @@ class RetrieveCustomersSubscriptionsRequestedUseCase(
 
         return Output(
             customerId = customer.id.toString(),
+            customerName = customer.name,
+            customerEmail = customer.email,
             subscriptions = subscriptions.map { Output.SubscriptionStatus(it.productId.toString(), it.status.name) },
         )
     }
@@ -27,6 +29,8 @@ class RetrieveCustomersSubscriptionsRequestedUseCase(
 
     class Output(
         val customerId: String,
+        val customerName: String,
+        val customerEmail: String,
         val subscriptions: List<SubscriptionStatus>,
     ) {
         class SubscriptionStatus(

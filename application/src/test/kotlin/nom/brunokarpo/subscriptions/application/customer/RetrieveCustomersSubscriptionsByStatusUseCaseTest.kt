@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class RetrieveCustomersSubscriptionByStatusUseCaseTest {
+class RetrieveCustomersSubscriptionsByStatusUseCaseTest {
     private lateinit var repository: CustomerRepository
 
     private lateinit var sut: RetrieveCustomersSubscriptionsRequestedUseCase
@@ -52,6 +52,9 @@ class RetrieveCustomersSubscriptionByStatusUseCaseTest {
                 )
 
             // then
+            assertEquals(customerId.toString(), output.customerId)
+            assertEquals(customer.name, output.customerName)
+            assertEquals(customer.email, output.customerEmail)
             assertEquals(2, output.subscriptions.size)
             assertTrue(output.subscriptions.any { it.productId == product1Id.toString() && it.status == "REQUESTED" })
             assertTrue(output.subscriptions.any { it.productId == product2Id.toString() && it.status == "REQUESTED" })
