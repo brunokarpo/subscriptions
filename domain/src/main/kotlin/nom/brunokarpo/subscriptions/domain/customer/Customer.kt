@@ -8,6 +8,7 @@ import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActive
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.domain.product.Product
+import nom.brunokarpo.subscriptions.domain.product.ProductId
 import java.time.ZonedDateTime
 
 class Customer private constructor(
@@ -66,6 +67,13 @@ class Customer private constructor(
         val subscription = Subscription.to(product = product)
         _subscriptions.add(subscription)
         this.recordEvent(ProductSubscribed(domainId = this.id, productId = product.id))
+        return subscription
+    }
+
+    fun activeSubscription(productId: ProductId): Subscription {
+        val subscription = _subscriptions
+            .first { subscription -> subscription.productId == productId } // TODO: handle when subscription does not exists
+            .apply { this.activate() }
         return subscription
     }
 

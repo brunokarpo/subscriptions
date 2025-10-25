@@ -3,7 +3,7 @@ package nom.brunokarpo.subscriptions.domain.customer.subscriptions
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionStatusUnknownException
 
 enum class SubscriptionStatus {
-    REQUESTED;
+    REQUESTED, ACTIVE;
 
     companion object {
         fun of(status: String): SubscriptionStatus = try {

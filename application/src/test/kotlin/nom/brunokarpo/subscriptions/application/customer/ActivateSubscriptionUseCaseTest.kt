@@ -21,7 +21,9 @@ class ActivateSubscriptionUseCaseTest {
     fun setUp() {
         customerRepository = mockk(relaxed = true)
 
-        sut = ActivateSubscriptionUseCase()
+        sut = ActivateSubscriptionUseCase(
+            customerRepository = customerRepository
+        )
     }
 
     @Test

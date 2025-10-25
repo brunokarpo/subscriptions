@@ -160,4 +160,19 @@ class CustomerTest {
         assertTrue(result.any { it.productId == product1Id })
         assertTrue(result.any { it.productId == product2Id })
     }
+
+    @Test
+    fun `should activate subscription`() {
+        val customer = Customer.create(name = "Test", email = "")
+        customer.activate()
+
+        val product = Product.create(name = "Product 1")
+        customer.subscribe(product)
+
+        val subscription = customer.activeSubscription(product.id)
+        assertTrue(customer.subscriptions.contains(subscription))
+
+        assertEquals(product.id, subscription.productId)
+        assertEquals(SubscriptionStatus.ACTIVE, subscription.status)
+    }
 }
