@@ -4,6 +4,7 @@ import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCas
 import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.usecases.ApplicationException
 import nom.brunokarpo.subscriptions.domain.common.DomainException
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestCreateCustomerDto
@@ -120,6 +121,15 @@ class CustomersController(
             ),
         )
     }
+
+    @ExceptionHandler(CustomerByIdNotFoundException::class)
+    fun handleApplicationException(ex: CustomerByIdNotFoundException): ResponseEntity<Map<String, String>> =
+        ResponseEntity
+            .status(
+                HttpStatus.NOT_FOUND,
+            ).body(
+                mapOf("message" to ex.message!!),
+            )
 
     @ExceptionHandler(ApplicationException::class)
     fun handleApplicationException(ex: ApplicationException): ResponseEntity<Map<String, String>> =

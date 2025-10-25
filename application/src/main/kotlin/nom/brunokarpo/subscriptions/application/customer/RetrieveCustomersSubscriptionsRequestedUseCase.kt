@@ -1,5 +1,6 @@
 package nom.brunokarpo.subscriptions.application.customer
 
+import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.usecases.UseCase
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
@@ -9,8 +10,11 @@ import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionSt
 class RetrieveCustomersSubscriptionsRequestedUseCase(
     private val customerRepository: CustomerRepository,
 ) : UseCase<RetrieveCustomersSubscriptionsRequestedUseCase.Input, RetrieveCustomersSubscriptionsRequestedUseCase.Output> {
+
+    @Throws(CustomerByIdNotFoundException::class)
     override suspend fun execute(input: Input): Output {
-        val customer = customerRepository.findById(CustomerId.from(input.customerId))!! // TODO: test when customer does not exists
+        val customerId = CustomerId.from(input.customerId)
+        val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
 
         val subscriptions: List<Subscription> = customer.getSubscriptionByStatus(SubscriptionStatus.of(input.status))
 

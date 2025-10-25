@@ -6,6 +6,7 @@ import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
+import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerNotExistsException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
 import nom.brunokarpo.subscriptions.domain.common.DomainException
@@ -145,7 +146,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .bodyValue(requestProductSubscriptionDto)
             .exchange()
             .expectStatus()
-            .isBadRequest
+            .isNotFound
             .expectBody()
             .jsonPath("$.message")
             .isEqualTo("Customer with id '$customerId' does not exists!")
@@ -223,6 +224,28 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .expectBody()
             .jsonPath("$.message")
             .isEqualTo("Unknown status: REQUESTED")
+    }
+
+    @Test
+    fun `should return 404 when customer is not found by id`() {
+        // given
+        val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+
+        // when
+        coEvery {
+            retrieveCustomersSubscriptionByStatusUseCase.execute(any())
+        } throws CustomerByIdNotFoundException(customerId = CustomerId.from(customerId))
+
+        client
+            .get()
+            .uri("/v1/customers/$customerId/subscriptions?status=REQUESTED")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound
+            .expectBody()
+            .jsonPath("$.message")
+            .isEqualTo("Customer with id '$customerId' does not exists!")
     }
 
     @Test

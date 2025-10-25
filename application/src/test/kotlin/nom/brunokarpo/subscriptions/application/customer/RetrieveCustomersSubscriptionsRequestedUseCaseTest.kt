@@ -3,6 +3,7 @@ package nom.brunokarpo.subscriptions.application.customer
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.domain.common.DomainException
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
@@ -86,5 +87,23 @@ class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
 
         assertNotNull(exception)
         assertEquals("Subscription Status unknown: NEVER_EXIST_SUCH_STATUS", exception.message)
+    }
+
+    @Test
+    fun `should throw customer not found by id exception when customer does not exists`() = runTest {
+        val customerId = CustomerId.unique()
+
+        coEvery { repository.findById(customerId) } returns null
+
+        val exception = assertThrows<CustomerByIdNotFoundException> {
+            sut.execute(
+                RetrieveCustomersSubscriptionsRequestedUseCase.Input(
+                    customerId = customerId.toString(),
+                    status = "requested"
+                ),
+            )
+        }
+
+        assertEquals("Customer with id '$customerId' does not exists!", exception.message)
     }
 }
