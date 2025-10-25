@@ -43,7 +43,7 @@ class CustomerDatabaseRepository(
             """
             INSERT INTO subscriptions (customer_id, product_id, status)
             VALUES (:customer_id, :product_id, :status)
-            ON CONFLICT (customer_id, product_id) DO NOTHING
+            ON CONFLICT (customer_id, product_id) DO UPDATE SET status = :status 
             """.trimIndent()
         val params =
             mapOf(
