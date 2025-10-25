@@ -10,7 +10,6 @@ import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionSt
 class RetrieveCustomersSubscriptionsRequestedUseCase(
     private val customerRepository: CustomerRepository,
 ) : UseCase<RetrieveCustomersSubscriptionsRequestedUseCase.Input, RetrieveCustomersSubscriptionsRequestedUseCase.Output> {
-
     @Throws(CustomerByIdNotFoundException::class)
     override suspend fun execute(input: Input): Output {
         val customerId = CustomerId.from(input.customerId)

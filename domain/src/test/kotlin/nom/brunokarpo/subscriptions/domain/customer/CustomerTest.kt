@@ -184,9 +184,10 @@ class CustomerTest {
 
         val productId = ProductId.unique()
 
-        val exception = assertThrows<SubscriptionNotFoundForProductIdException> {
-            customer.activeSubscription(productId)
-        }
+        val exception =
+            assertThrows<SubscriptionNotFoundForProductIdException> {
+                customer.activeSubscription(productId)
+            }
 
         assertEquals("Customer with id '${customer.id}' does not have a subscription with product id '$productId'", exception.message)
     }

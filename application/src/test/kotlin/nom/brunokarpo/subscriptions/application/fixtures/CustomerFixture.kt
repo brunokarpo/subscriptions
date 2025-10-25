@@ -4,7 +4,6 @@ import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 
 object CustomerFixture {
-
     const val CUSTOMER_NAME = "Default Name"
     const val CUSTOMER_EMAIL = "default@email.com"
 
@@ -14,11 +13,12 @@ object CustomerFixture {
         email: String = CUSTOMER_EMAIL,
         active: Boolean = false,
     ): Customer {
-        val customer = Customer.create(
-            id = customerId,
-            name = name,
-            email = email,
-        )
+        val customer =
+            Customer.create(
+                id = customerId,
+                name = name,
+                email = email,
+            )
         if (active) {
             customer.activate()
         }

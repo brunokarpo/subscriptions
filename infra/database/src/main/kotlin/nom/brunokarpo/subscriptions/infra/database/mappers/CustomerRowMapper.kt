@@ -9,20 +9,18 @@ import java.time.ZonedDateTime
 import java.util.UUID
 
 class CustomerRowMapper(
-    private val subscriptions: List<Subscription> = emptyList()
-): RowMapper<Customer> {
+    private val subscriptions: List<Subscription> = emptyList(),
+) : RowMapper<Customer> {
     override fun mapRow(
         rs: ResultSet,
-        rowNum: Int
-    ): Customer {
-        return Customer.Companion.create(
+        rowNum: Int,
+    ): Customer =
+        Customer.Companion.create(
             id = CustomerId.Companion.from(rs.getObject("id", UUID::class.java)),
             name = rs.getString("name"),
             email = rs.getString("email"),
             active = rs.getBoolean("active"),
             activeUntil = rs.getTimestamp("active_until")?.let { ZonedDateTime.parse(it.toInstant().toString()) },
-            subscription = subscriptions
+            subscription = subscriptions,
         )
-    }
-
 }

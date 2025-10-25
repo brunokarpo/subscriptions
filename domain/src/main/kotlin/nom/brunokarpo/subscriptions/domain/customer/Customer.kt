@@ -74,10 +74,11 @@ class Customer private constructor(
 
     @Throws(SubscriptionNotFoundForProductIdException::class)
     fun activeSubscription(productId: ProductId): Subscription {
-        val subscription = _subscriptions
-            .firstOrNull() { subscription -> subscription.productId == productId }
-            ?.apply { this.activate() }
-            ?: throw SubscriptionNotFoundForProductIdException(customerId = id, productId = productId)
+        val subscription =
+            _subscriptions
+                .firstOrNull { subscription -> subscription.productId == productId }
+                ?.apply { this.activate() }
+                ?: throw SubscriptionNotFoundForProductIdException(customerId = id, productId = productId)
         return subscription
     }
 

@@ -17,7 +17,6 @@ import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertEquals
 
 class ActivateSubscriptionUseCaseTest {
-
     private lateinit var customerRepository: CustomerRepository
 
     private lateinit var sut: ActivateSubscriptionUseCase
@@ -26,74 +25,83 @@ class ActivateSubscriptionUseCaseTest {
     fun setUp() {
         customerRepository = mockk(relaxed = true)
 
-        sut = ActivateSubscriptionUseCase(
-            customerRepository = customerRepository
-        )
+        sut =
+            ActivateSubscriptionUseCase(
+                customerRepository = customerRepository,
+            )
     }
 
     @Test
-    fun `should activate product subscription`() = runTest {
-        // given
-        val customer = CustomerFixture.createCustomer(active = true)
-        val product = ProductFixture.createProduct()
-        customer.subscribe(product)
+    fun `should activate product subscription`() =
+        runTest {
+            // given
+            val customer = CustomerFixture.createCustomer(active = true)
+            val product = ProductFixture.createProduct()
+            customer.subscribe(product)
 
-        coEvery { customerRepository.findById(customer.id) } returns customer
+            coEvery { customerRepository.findById(customer.id) } returns customer
 
-        // when
-        val input = ActivateSubscriptionUseCase.Input(
-            customerId = customer.id.toString(),
-            productId = product.id.toString()
-        )
-        val output = sut.execute(input)
+            // when
+            val input =
+                ActivateSubscriptionUseCase.Input(
+                    customerId = customer.id.toString(),
+                    productId = product.id.toString(),
+                )
+            val output = sut.execute(input)
 
-        // then
-        assertEquals(customer.id.toString(), output.customerId)
-        assertEquals(product.id.toString(), output.productId)
-        assertEquals("ACTIVE", output.status)
+            // then
+            assertEquals(customer.id.toString(), output.customerId)
+            assertEquals(product.id.toString(), output.productId)
+            assertEquals("ACTIVE", output.status)
 
-        coVerify { customerRepository.save(customer) }
-    }
-
-    @Test
-    fun `should throw exception when customer does not have the subscription requested to a product id`() = runTest {
-        // given
-        val customer = CustomerFixture.createCustomer(active = true)
-        val productId = ProductId.unique()
-
-        coEvery { customerRepository.findById(customer.id) } returns customer
-
-        // when
-        val input = ActivateSubscriptionUseCase.Input(
-            customerId = customer.id.toString(),
-            productId = productId.toString()
-        )
-
-        val exception = assertThrows<DomainException> {
-            sut.execute(input)
+            coVerify { customerRepository.save(customer) }
         }
 
-        // then
-        assertEquals("Customer with id '${customer.id}' does not have a subscription with product id '$productId'", exception.message)
-        coVerify(exactly = 0) { customerRepository.save(any()) }
-    }
-
     @Test
-    fun `should throw customer by id not found exception when customer does not exists`() = runTest {
-        val customerId = CustomerId.unique()
-        val productId = ProductId.unique()
+    fun `should throw exception when customer does not have the subscription requested to a product id`() =
+        runTest {
+            // given
+            val customer = CustomerFixture.createCustomer(active = true)
+            val productId = ProductId.unique()
 
-        coEvery { customerRepository.findById(customerId) } returns null
+            coEvery { customerRepository.findById(customer.id) } returns customer
 
-        val input = ActivateSubscriptionUseCase.Input(
-            customerId = customerId.toString(),
-            productId = productId.toString()
-        )
-        val exception = assertThrows<CustomerByIdNotFoundException> {
-            sut.execute(input)
+            // when
+            val input =
+                ActivateSubscriptionUseCase.Input(
+                    customerId = customer.id.toString(),
+                    productId = productId.toString(),
+                )
+
+            val exception =
+                assertThrows<DomainException> {
+                    sut.execute(input)
+                }
+
+            // then
+            assertEquals("Customer with id '${customer.id}' does not have a subscription with product id '$productId'", exception.message)
+            coVerify(exactly = 0) { customerRepository.save(any()) }
         }
 
-        assertEquals("Customer with id '$customerId' does not exists!", exception.message)
-        coVerify(exactly = 0) { customerRepository.save(any()) }
-    }
+    @Test
+    fun `should throw customer by id not found exception when customer does not exists`() =
+        runTest {
+            val customerId = CustomerId.unique()
+            val productId = ProductId.unique()
+
+            coEvery { customerRepository.findById(customerId) } returns null
+
+            val input =
+                ActivateSubscriptionUseCase.Input(
+                    customerId = customerId.toString(),
+                    productId = productId.toString(),
+                )
+            val exception =
+                assertThrows<CustomerByIdNotFoundException> {
+                    sut.execute(input)
+                }
+
+            assertEquals("Customer with id '$customerId' does not exists!", exception.message)
+            coVerify(exactly = 0) { customerRepository.save(any()) }
+        }
 }

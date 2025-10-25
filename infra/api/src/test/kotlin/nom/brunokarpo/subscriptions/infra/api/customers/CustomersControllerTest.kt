@@ -26,11 +26,11 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val expectedEmail = "sara@email.com"
 
         coEvery { createNewCustomerUseCase.execute(any()) } returns
-                CreateNewCustomerUseCase.Output(
-                    id = expectedId,
-                    name = expectedName,
-                    email = expectedEmail,
-                )
+            CreateNewCustomerUseCase.Output(
+                id = expectedId,
+                name = expectedName,
+                email = expectedEmail,
+            )
 
         val clientDto = RequestCreateCustomerDto(name = expectedName, email = expectedEmail)
 
@@ -80,11 +80,11 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val expectedEmail = "<EMAIL>"
 
         coEvery { subscribeProductToCustomerUseCase.execute(any()) } returns
-                SubscribeProductToCustomerUseCase.Output(
-                    email = expectedEmail,
-                    productName = productName,
-                    subscriptionStatus = "REQUESTED",
-                )
+            SubscribeProductToCustomerUseCase.Output(
+                email = expectedEmail,
+                productName = productName,
+                subscriptionStatus = "REQUESTED",
+            )
 
         val requestProductSubscriptionDto = RequestProductSubscriptionDto(productName = productName)
 
@@ -133,9 +133,9 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val productName = "PRODUCT_ID_1"
 
         coEvery { subscribeProductToCustomerUseCase.execute(any()) } throws
-                CustomerByIdNotFoundException(
-                    CustomerId.from(customerId),
-                )
+            CustomerByIdNotFoundException(
+                CustomerId.from(customerId),
+            )
 
         val requestProductSubscriptionDto = RequestProductSubscriptionDto(productName = productName)
 
@@ -163,22 +163,22 @@ class CustomersControllerTest : ApiConfigurationTest() {
         coEvery {
             retrieveCustomersSubscriptionByStatusUseCase.execute(any())
         } returns
-                RetrieveCustomersSubscriptionsRequestedUseCase.Output(
-                    customerId = customerId,
-                    customerName = customerName,
-                    customerEmail = customerEmail,
-                    subscriptions =
-                        listOf(
-                            RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
-                                productId = productId1,
-                                status = "REQUESTED",
-                            ),
-                            RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
-                                productId = productId2,
-                                status = "REQUESTED",
-                            ),
+            RetrieveCustomersSubscriptionsRequestedUseCase.Output(
+                customerId = customerId,
+                customerName = customerName,
+                customerEmail = customerEmail,
+                subscriptions =
+                    listOf(
+                        RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
+                            productId = productId1,
+                            status = "REQUESTED",
                         ),
-                )
+                        RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
+                            productId = productId2,
+                            status = "REQUESTED",
+                        ),
+                    ),
+            )
 
         client
             .get()
@@ -212,7 +212,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
         // when
         coEvery {
             retrieveCustomersSubscriptionByStatusUseCase.execute(any())
-        } throws object : DomainException("Unknown status: REQUESTED"){}
+        } throws object : DomainException("Unknown status: REQUESTED") {}
 
         client
             .get()
@@ -256,12 +256,12 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val activeUntil = "2021-08-31T23:59:59"
 
         coEvery { customerActivateUseCase.execute(any()) } returns
-                CustomerActivateUseCase.Output(
-                    customerId = customerId,
-                    name = customerName,
-                    email = customerEmail,
-                    activeUntil = activeUntil,
-                )
+            CustomerActivateUseCase.Output(
+                customerId = customerId,
+                name = customerName,
+                email = customerEmail,
+                activeUntil = activeUntil,
+            )
 
         client
             .patch()

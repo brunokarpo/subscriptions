@@ -6,5 +6,5 @@ import nom.brunokarpo.subscriptions.domain.product.ProductId
 
 class SubscriptionNotFoundForProductIdException(
     customerId: CustomerId,
-    productId: ProductId
+    productId: ProductId,
 ) : DomainException("Customer with id '$customerId' does not have a subscription with product id '$productId'")

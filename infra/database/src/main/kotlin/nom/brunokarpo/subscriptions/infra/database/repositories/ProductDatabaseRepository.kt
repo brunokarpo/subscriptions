@@ -9,47 +9,55 @@ import java.util.UUID
 
 @Repository
 class ProductDatabaseRepository(
-    private val jdbcTemplate: NamedParameterJdbcTemplate
+    private val jdbcTemplate: NamedParameterJdbcTemplate,
 ) : ProductRepository {
     override suspend fun save(aggregate: Product) {
-        val sql = """
+        val sql =
+            """
             INSERT INTO products (id, name, created_at)
             VALUES (:id, :name, now())
-        """.trimIndent()
-        val params = mapOf(
-            "id" to aggregate.id.value(),
-            "name" to aggregate.name
-        )
+            """.trimIndent()
+        val params =
+            mapOf(
+                "id" to aggregate.id.value(),
+                "name" to aggregate.name,
+            )
         jdbcTemplate.update(sql, params)
     }
 
     override suspend fun findById(id: ProductId): Product? {
-        val sql = """
+        val sql =
+            """
             SELECT id, name FROM products WHERE id = :id
-        """.trimIndent()
-        val params = mapOf(
-            "id" to id.value()
-        )
-        return jdbcTemplate.query(sql ,params) { rs, _ ->
-            Product.create(
-                id = ProductId.from(rs.getObject("id", UUID::class.java)),
-                name = rs.getString("name")
+            """.trimIndent()
+        val params =
+            mapOf(
+                "id" to id.value(),
             )
-        }.firstOrNull()
+        return jdbcTemplate
+            .query(sql, params) { rs, _ ->
+                Product.create(
+                    id = ProductId.from(rs.getObject("id", UUID::class.java)),
+                    name = rs.getString("name"),
+                )
+            }.firstOrNull()
     }
 
     override suspend fun findByName(name: String): Product? {
-        val sql = """
+        val sql =
+            """
             SELECT id, name FROM products WHERE lower(name) = :name
-        """.trimIndent()
-        val params = mapOf(
-            "name" to name.lowercase()
-        )
-        return jdbcTemplate.query(sql ,params) { rs, _ ->
-            Product.create(
-                id = ProductId.from(rs.getObject("id", UUID::class.java)),
-                name = rs.getString("name")
+            """.trimIndent()
+        val params =
+            mapOf(
+                "name" to name.lowercase(),
             )
-        }.firstOrNull()
+        return jdbcTemplate
+            .query(sql, params) { rs, _ ->
+                Product.create(
+                    id = ProductId.from(rs.getObject("id", UUID::class.java)),
+                    name = rs.getString("name"),
+                )
+            }.firstOrNull()
     }
 }

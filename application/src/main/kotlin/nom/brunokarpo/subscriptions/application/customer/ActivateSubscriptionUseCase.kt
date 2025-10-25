@@ -9,9 +9,8 @@ import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
 import nom.brunokarpo.subscriptions.domain.product.ProductId
 
 class ActivateSubscriptionUseCase(
-    private val customerRepository: CustomerRepository
+    private val customerRepository: CustomerRepository,
 ) : UseCase<ActivateSubscriptionUseCase.Input, ActivateSubscriptionUseCase.Output> {
-
     @Throws(SubscriptionNotFoundForProductIdException::class)
     override suspend fun execute(input: Input): Output {
         val customerId = CustomerId.from(input.customerId)
@@ -26,10 +25,18 @@ class ActivateSubscriptionUseCase(
         return Output(
             customerId = customer.id.toString(),
             productId = subscription.productId.toString(),
-            status = subscription.status.name
+            status = subscription.status.name,
         )
     }
 
-    class Input(val customerId: String, val productId: String)
-    class Output(val customerId: String, val productId: String, val status: String)
+    class Input(
+        val customerId: String,
+        val productId: String,
+    )
+
+    class Output(
+        val customerId: String,
+        val productId: String,
+        val status: String,
+    )
 }

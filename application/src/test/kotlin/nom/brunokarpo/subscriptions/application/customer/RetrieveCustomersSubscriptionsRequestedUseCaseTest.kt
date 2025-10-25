@@ -54,7 +54,7 @@ class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
                 sut.execute(
                     RetrieveCustomersSubscriptionsRequestedUseCase.Input(
                         customerId = customerId.toString(),
-                        status = "requested"
+                        status = "requested",
                     ),
                 )
 
@@ -68,42 +68,46 @@ class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
         }
 
     @Test
-    fun `should throw exception when status is unknown`() = runTest {
-        // given
-        val customerId = CustomerId.unique()
-        val customer = Customer.create(id = customerId, name = "Test", email = "<EMAIL>")
+    fun `should throw exception when status is unknown`() =
+        runTest {
+            // given
+            val customerId = CustomerId.unique()
+            val customer = Customer.create(id = customerId, name = "Test", email = "<EMAIL>")
 
-        coEvery { repository.findById(customerId) } returns customer
+            coEvery { repository.findById(customerId) } returns customer
 
-        // when
-        val exception = assertThrows<DomainException> {
-            sut.execute(
-                RetrieveCustomersSubscriptionsRequestedUseCase.Input(
-                    customerId = customerId.toString(),
-                    status = "NEVER_EXIST_SUCH_STATUS"
-                ),
-            )
+            // when
+            val exception =
+                assertThrows<DomainException> {
+                    sut.execute(
+                        RetrieveCustomersSubscriptionsRequestedUseCase.Input(
+                            customerId = customerId.toString(),
+                            status = "NEVER_EXIST_SUCH_STATUS",
+                        ),
+                    )
+                }
+
+            assertNotNull(exception)
+            assertEquals("Subscription Status unknown: NEVER_EXIST_SUCH_STATUS", exception.message)
         }
-
-        assertNotNull(exception)
-        assertEquals("Subscription Status unknown: NEVER_EXIST_SUCH_STATUS", exception.message)
-    }
 
     @Test
-    fun `should throw customer not found by id exception when customer does not exists`() = runTest {
-        val customerId = CustomerId.unique()
+    fun `should throw customer not found by id exception when customer does not exists`() =
+        runTest {
+            val customerId = CustomerId.unique()
 
-        coEvery { repository.findById(customerId) } returns null
+            coEvery { repository.findById(customerId) } returns null
 
-        val exception = assertThrows<CustomerByIdNotFoundException> {
-            sut.execute(
-                RetrieveCustomersSubscriptionsRequestedUseCase.Input(
-                    customerId = customerId.toString(),
-                    status = "requested"
-                ),
-            )
+            val exception =
+                assertThrows<CustomerByIdNotFoundException> {
+                    sut.execute(
+                        RetrieveCustomersSubscriptionsRequestedUseCase.Input(
+                            customerId = customerId.toString(),
+                            status = "requested",
+                        ),
+                    )
+                }
+
+            assertEquals("Customer with id '$customerId' does not exists!", exception.message)
         }
-
-        assertEquals("Customer with id '$customerId' does not exists!", exception.message)
-    }
 }

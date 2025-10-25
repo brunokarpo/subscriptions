@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class SubscriptionStatusTest {
-
     @Test
     fun `should create subscription status by name`() {
         val status = SubscriptionStatus.of("REQUESTED")
@@ -23,9 +22,10 @@ class SubscriptionStatusTest {
 
     @Test
     fun `should throw subscription status unknown when status does not exists`() {
-        val exception = assertThrows<SubscriptionStatusUnknownException> {
-            SubscriptionStatus.of("NON_EXISTENT_STATUS")
-        }
+        val exception =
+            assertThrows<SubscriptionStatusUnknownException> {
+                SubscriptionStatus.of("NON_EXISTENT_STATUS")
+            }
         assertEquals("Subscription Status unknown: NON_EXISTENT_STATUS", exception.message)
     }
 }
