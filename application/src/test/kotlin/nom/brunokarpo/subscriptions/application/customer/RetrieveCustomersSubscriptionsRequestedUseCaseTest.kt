@@ -3,6 +3,7 @@ package nom.brunokarpo.subscriptions.application.customer
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
+import nom.brunokarpo.subscriptions.domain.common.DomainException
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
@@ -12,8 +13,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import kotlin.test.assertNotNull
 
-class RetrieveCustomersSubscriptionsByStatusUseCaseTest {
+class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
     private lateinit var repository: CustomerRepository
 
     private lateinit var sut: RetrieveCustomersSubscriptionsRequestedUseCase
@@ -48,7 +51,10 @@ class RetrieveCustomersSubscriptionsByStatusUseCaseTest {
             // when
             val output =
                 sut.execute(
-                    RetrieveCustomersSubscriptionsRequestedUseCase.Input(customerId = customerId.toString(), status = "REQUESTED"),
+                    RetrieveCustomersSubscriptionsRequestedUseCase.Input(
+                        customerId = customerId.toString(),
+                        status = "requested"
+                    ),
                 )
 
             // then
@@ -59,4 +65,26 @@ class RetrieveCustomersSubscriptionsByStatusUseCaseTest {
             assertTrue(output.subscriptions.any { it.productId == product1Id.toString() && it.status == "REQUESTED" })
             assertTrue(output.subscriptions.any { it.productId == product2Id.toString() && it.status == "REQUESTED" })
         }
+
+    @Test
+    fun `should throw exception when status is unknown`() = runTest {
+        // given
+        val customerId = CustomerId.unique()
+        val customer = Customer.create(id = customerId, name = "Test", email = "<EMAIL>")
+
+        coEvery { repository.findById(customerId) } returns customer
+
+        // when
+        val exception = assertThrows<DomainException> {
+            sut.execute(
+                RetrieveCustomersSubscriptionsRequestedUseCase.Input(
+                    customerId = customerId.toString(),
+                    status = "NEVER_EXIST_SUCH_STATUS"
+                ),
+            )
+        }
+
+        assertNotNull(exception)
+        assertEquals("Subscription Status unknown: NEVER_EXIST_SUCH_STATUS", exception.message)
+    }
 }

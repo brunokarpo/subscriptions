@@ -5,6 +5,7 @@ import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.usecases.ApplicationException
+import nom.brunokarpo.subscriptions.domain.common.DomainException
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestCreateCustomerDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestProductSubscriptionDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.ResponseCustomerDto
@@ -122,6 +123,15 @@ class CustomersController(
 
     @ExceptionHandler(ApplicationException::class)
     fun handleApplicationException(ex: ApplicationException): ResponseEntity<Map<String, String>> =
+        ResponseEntity
+            .status(
+                HttpStatus.BAD_REQUEST,
+            ).body(
+                mapOf("message" to ex.message!!),
+            )
+
+    @ExceptionHandler(DomainException::class)
+    fun handleApplicationException(ex: DomainException): ResponseEntity<Map<String, String>> =
         ResponseEntity
             .status(
                 HttpStatus.BAD_REQUEST,

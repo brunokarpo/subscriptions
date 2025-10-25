@@ -8,15 +8,15 @@ Content-Type: application/json
 }
 
 ###
-PATCH http://localhost:8080/v1/customers/300d5d28-0411-4eef-b24c-824911fd9f9d/activate
+PATCH http://localhost:8080/v1/customers/19fef767-23df-4ce6-83a8-f3b42782a0aa/activate
 
 ###
-POST http://localhost:8080/v1/customers/300d5d28-0411-4eef-b24c-824911fd9f9d/products
+POST http://localhost:8080/v1/customers/19fef767-23df-4ce6-83a8-f3b42782a0aa/products
 Content-Type: application/json
 
 {
-  "productName": "Practical Aluminum Shirt"
+  "productName": "Rustic Marble Keyboard"
 }
 
 ###
-GET http://localhost:8080/v1/customers/300d5d28-0411-4eef-b24c-824911fd9f9d/subscriptions?status=REQUESTED
+GET http://localhost:8080/v1/customers/19fef767-23df-4ce6-83a8-f3b42782a0aa/subscriptions?status=ACTIVE

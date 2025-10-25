@@ -8,12 +8,14 @@ import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCusto
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
+import nom.brunokarpo.subscriptions.domain.common.DomainException
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.infra.api.ApiConfigurationTest
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestCreateCustomerDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestProductSubscriptionDto
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
+import java.lang.Exception
 
 class CustomersControllerTest : ApiConfigurationTest() {
     @Test
@@ -199,6 +201,28 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .isEqualTo(productId2)
             .jsonPath("$.subscriptions[1].status")
             .isEqualTo("REQUESTED")
+    }
+
+    @Test
+    fun `should return bad request error when subscription status is unknown`() {
+        // given
+        val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+
+        // when
+        coEvery {
+            retrieveCustomersSubscriptionByStatusUseCase.execute(any())
+        } throws object : DomainException("Unknown status: REQUESTED"){}
+
+        client
+            .get()
+            .uri("/v1/customers/$customerId/subscriptions?status=REQUESTED")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+            .expectBody()
+            .jsonPath("$.message")
+            .isEqualTo("Unknown status: REQUESTED")
     }
 
     @Test

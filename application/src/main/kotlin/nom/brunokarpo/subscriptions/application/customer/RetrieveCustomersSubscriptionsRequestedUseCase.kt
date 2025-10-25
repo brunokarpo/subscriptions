@@ -10,9 +10,9 @@ class RetrieveCustomersSubscriptionsRequestedUseCase(
     private val customerRepository: CustomerRepository,
 ) : UseCase<RetrieveCustomersSubscriptionsRequestedUseCase.Input, RetrieveCustomersSubscriptionsRequestedUseCase.Output> {
     override suspend fun execute(input: Input): Output {
-        val customer = customerRepository.findById(CustomerId.from(input.customerId))!!
+        val customer = customerRepository.findById(CustomerId.from(input.customerId))!! // TODO: test when customer does not exists
 
-        val subscriptions: List<Subscription> = customer.getSubscriptionByStatus(SubscriptionStatus.valueOf(input.status.uppercase()))
+        val subscriptions: List<Subscription> = customer.getSubscriptionByStatus(SubscriptionStatus.of(input.status))
 
         return Output(
             customerId = customer.id.toString(),
