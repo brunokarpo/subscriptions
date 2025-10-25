@@ -5,11 +5,13 @@ import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
+import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
 import java.time.ZonedDateTime
+import kotlin.jvm.Throws
 
 class Customer private constructor(
     override val id: CustomerId,
@@ -70,10 +72,12 @@ class Customer private constructor(
         return subscription
     }
 
+    @Throws(SubscriptionNotFoundForProductIdException::class)
     fun activeSubscription(productId: ProductId): Subscription {
         val subscription = _subscriptions
-            .first { subscription -> subscription.productId == productId } // TODO: handle when subscription does not exists
-            .apply { this.activate() }
+            .firstOrNull() { subscription -> subscription.productId == productId }
+            ?.apply { this.activate() }
+            ?: throw SubscriptionNotFoundForProductIdException(customerId = id, productId = productId)
         return subscription
     }
 

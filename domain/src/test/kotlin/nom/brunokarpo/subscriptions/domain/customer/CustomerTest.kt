@@ -4,6 +4,7 @@ import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
+import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.domain.product.Product
@@ -174,5 +175,19 @@ class CustomerTest {
 
         assertEquals(product.id, subscription.productId)
         assertEquals(SubscriptionStatus.ACTIVE, subscription.status)
+    }
+
+    @Test
+    fun `should throw exception when try activate subscription to product id not requested`() {
+        val customer = Customer.create(name = "Test", email = "")
+        customer.activate()
+
+        val productId = ProductId.unique()
+
+        val exception = assertThrows<SubscriptionNotFoundForProductIdException> {
+            customer.activeSubscription(productId)
+        }
+
+        assertEquals("Customer with id '${customer.id}' does not have a subscription with product id '$productId'", exception.message)
     }
 }
