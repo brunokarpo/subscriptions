@@ -49,6 +49,8 @@ class CustomerActivateUseCaseTest {
             // then
             assertNotNull(output)
             assertEquals(customerId.toString(), output.customerId)
+            assertEquals(customer.name, output.name)
+            assertEquals(customer.email, output.email)
             assertEquals(customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), output.activeUntil)
 
             val slot = slot<Customer>()

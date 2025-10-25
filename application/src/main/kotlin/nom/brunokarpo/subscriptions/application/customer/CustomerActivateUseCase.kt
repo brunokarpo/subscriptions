@@ -19,7 +19,8 @@ class CustomerActivateUseCase(
 
         return Output(
             customerId = customerId.toString(),
-            // TODO("add name and email to show in the API")
+            name = customer.name,
+            email = customer.email,
             activeUntil = customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
         )
     }
@@ -30,6 +31,8 @@ class CustomerActivateUseCase(
 
     class Output(
         val customerId: String,
+        val name: String,
+        val email: String,
         val activeUntil: String,
     )
 }

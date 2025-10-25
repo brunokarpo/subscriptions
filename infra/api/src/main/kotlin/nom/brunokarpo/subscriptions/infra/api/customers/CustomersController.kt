@@ -112,6 +112,8 @@ class CustomersController(
         return ResponseEntity.ok(
             ResponseCustomerDto(
                 id = output.customerId,
+                name = output.name,
+                email = output.email,
                 activeUntil = output.activeUntil,
             ),
         )
