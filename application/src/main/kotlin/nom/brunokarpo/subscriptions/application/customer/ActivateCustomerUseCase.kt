@@ -6,9 +6,9 @@ import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
 import java.time.format.DateTimeFormatter
 
-class CustomerActivateUseCase(
+class ActivateCustomerUseCase(
     private val customerRepository: CustomerRepository,
-) : UseCase<CustomerActivateUseCase.Input, CustomerActivateUseCase.Output> {
+) : UseCase<ActivateCustomerUseCase.Input, ActivateCustomerUseCase.Output> {
     override suspend fun execute(input: Input): Output {
         val customerId = CustomerId.from(input.customerId)
 

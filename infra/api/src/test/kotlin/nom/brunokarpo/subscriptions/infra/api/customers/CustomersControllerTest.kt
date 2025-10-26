@@ -3,11 +3,10 @@ package nom.brunokarpo.subscriptions.infra.api.customers
 import io.mockk.coEvery
 import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
-import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
-import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
+import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.RetrieveSubscriptionsByStatusUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
-import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerNotExistsException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniqueEmailException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
 import nom.brunokarpo.subscriptions.domain.common.DomainException
@@ -19,7 +18,6 @@ import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestCreateCustom
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestProductSubscriptionDto
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
-import java.lang.Exception
 import java.util.UUID
 
 class CustomersControllerTest : ApiConfigurationTest() {
@@ -167,17 +165,17 @@ class CustomersControllerTest : ApiConfigurationTest() {
         coEvery {
             retrieveCustomersSubscriptionByStatusUseCase.execute(any())
         } returns
-            RetrieveCustomersSubscriptionsRequestedUseCase.Output(
+            RetrieveSubscriptionsByStatusUseCase.Output(
                 customerId = customerId,
                 customerName = customerName,
                 customerEmail = customerEmail,
                 subscriptions =
                     listOf(
-                        RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
+                        RetrieveSubscriptionsByStatusUseCase.Output.SubscriptionStatus(
                             productId = productId1,
                             status = "REQUESTED",
                         ),
-                        RetrieveCustomersSubscriptionsRequestedUseCase.Output.SubscriptionStatus(
+                        RetrieveSubscriptionsByStatusUseCase.Output.SubscriptionStatus(
                             productId = productId2,
                             status = "REQUESTED",
                         ),
@@ -261,7 +259,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val activeUntil = "2021-08-31T23:59:59"
 
         coEvery { customerActivateUseCase.execute(any()) } returns
-            CustomerActivateUseCase.Output(
+            ActivateCustomerUseCase.Output(
                 customerId = customerId,
                 name = customerName,
                 email = customerEmail,

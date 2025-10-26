@@ -1,8 +1,8 @@
 package nom.brunokarpo.subscriptions.infra.app.configurations
 
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
-import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
-import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
+import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.RetrieveSubscriptionsByStatusUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.product.CreateNewProductUseCase
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
@@ -28,8 +28,8 @@ class UseCaseConfigurations {
 
     @Bean
     fun retrieveCustomersSubscriptionByStatusUseCase(customerRepository: CustomerRepository) =
-        RetrieveCustomersSubscriptionsRequestedUseCase(customerRepository = customerRepository)
+        RetrieveSubscriptionsByStatusUseCase(customerRepository = customerRepository)
 
     @Bean
-    fun customerActivateUseCase(customerRepository: CustomerRepository) = CustomerActivateUseCase(customerRepository = customerRepository)
+    fun customerActivateUseCase(customerRepository: CustomerRepository) = ActivateCustomerUseCase(customerRepository = customerRepository)
 }

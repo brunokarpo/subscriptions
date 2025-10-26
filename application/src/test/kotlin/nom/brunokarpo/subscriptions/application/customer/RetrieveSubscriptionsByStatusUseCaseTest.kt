@@ -17,16 +17,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.assertNotNull
 
-class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
+class RetrieveSubscriptionsByStatusUseCaseTest {
     private lateinit var repository: CustomerRepository
 
-    private lateinit var sut: RetrieveCustomersSubscriptionsRequestedUseCase
+    private lateinit var sut: RetrieveSubscriptionsByStatusUseCase
 
     @BeforeEach
     fun setUp() {
         repository = mockk(relaxed = true)
 
-        sut = RetrieveCustomersSubscriptionsRequestedUseCase(customerRepository = repository)
+        sut = RetrieveSubscriptionsByStatusUseCase(customerRepository = repository)
     }
 
     @Test
@@ -52,7 +52,7 @@ class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
             // when
             val output =
                 sut.execute(
-                    RetrieveCustomersSubscriptionsRequestedUseCase.Input(
+                    RetrieveSubscriptionsByStatusUseCase.Input(
                         customerId = customerId.toString(),
                         status = "requested",
                     ),
@@ -80,7 +80,7 @@ class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
             val exception =
                 assertThrows<DomainException> {
                     sut.execute(
-                        RetrieveCustomersSubscriptionsRequestedUseCase.Input(
+                        RetrieveSubscriptionsByStatusUseCase.Input(
                             customerId = customerId.toString(),
                             status = "NEVER_EXIST_SUCH_STATUS",
                         ),
@@ -101,7 +101,7 @@ class RetrieveCustomersSubscriptionsRequestedUseCaseTest {
             val exception =
                 assertThrows<CustomerByIdNotFoundException> {
                     sut.execute(
-                        RetrieveCustomersSubscriptionsRequestedUseCase.Input(
+                        RetrieveSubscriptionsByStatusUseCase.Input(
                             customerId = customerId.toString(),
                             status = "requested",
                         ),

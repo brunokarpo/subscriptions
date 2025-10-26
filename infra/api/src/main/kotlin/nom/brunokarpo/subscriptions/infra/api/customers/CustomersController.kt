@@ -2,8 +2,8 @@ package nom.brunokarpo.subscriptions.infra.api.customers
 
 import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
-import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
-import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
+import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.RetrieveSubscriptionsByStatusUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.usecases.ApplicationException
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -32,8 +31,8 @@ import org.springframework.web.bind.annotation.RestController
 class CustomersController(
     private val createNewCustomerUseCase: CreateNewCustomerUseCase,
     private val subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase,
-    private val retrieveCustomersSubscriptionByStatusUseCase: RetrieveCustomersSubscriptionsRequestedUseCase,
-    private val customerActivateUseCase: CustomerActivateUseCase,
+    private val retrieveCustomersSubscriptionByStatusUseCase: RetrieveSubscriptionsByStatusUseCase,
+    private val customerActivateUseCase: ActivateCustomerUseCase,
     private val activateSubscriptionUseCase: ActivateSubscriptionUseCase,
 ) {
     @PostMapping
@@ -62,7 +61,7 @@ class CustomersController(
     suspend fun activateCustomer(
         @PathVariable customerId: String,
     ): ResponseEntity<ResponseCustomerDto> {
-        val input = CustomerActivateUseCase.Input(customerId = customerId)
+        val input = ActivateCustomerUseCase.Input(customerId = customerId)
 
         val output = customerActivateUseCase.execute(input)
 
@@ -104,7 +103,7 @@ class CustomersController(
         @PathVariable customerId: String,
         @RequestParam(required = true) status: String,
     ): ResponseEntity<ResponseSubscriptionsStatusDto> {
-        val input = RetrieveCustomersSubscriptionsRequestedUseCase.Input(customerId = customerId, status = status)
+        val input = RetrieveSubscriptionsByStatusUseCase.Input(customerId = customerId, status = status)
 
         val output = retrieveCustomersSubscriptionByStatusUseCase.execute(input)
 

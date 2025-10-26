@@ -3,8 +3,8 @@ package nom.brunokarpo.subscriptions.infra.api
 import com.ninjasquad.springmockk.MockkBean
 import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
-import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
-import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
+import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.RetrieveSubscriptionsByStatusUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.product.CreateNewProductUseCase
 import org.junit.jupiter.api.Test
@@ -27,10 +27,10 @@ class ApiConfigurationTest {
     lateinit var subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase
 
     @MockkBean
-    lateinit var retrieveCustomersSubscriptionByStatusUseCase: RetrieveCustomersSubscriptionsRequestedUseCase
+    lateinit var retrieveCustomersSubscriptionByStatusUseCase: RetrieveSubscriptionsByStatusUseCase
 
     @MockkBean
-    lateinit var customerActivateUseCase: CustomerActivateUseCase
+    lateinit var customerActivateUseCase: ActivateCustomerUseCase
 
     @MockkBean
     lateinit var activateSubscriptionUseCase: ActivateSubscriptionUseCase
