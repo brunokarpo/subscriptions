@@ -4,7 +4,8 @@ import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerDeactivated
-import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
+import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionRequeted
+import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionActivated
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
@@ -69,7 +70,7 @@ class Customer private constructor(
         }
         val subscription = Subscription.to(product = product)
         _subscriptions.add(subscription)
-        this.recordEvent(ProductSubscribed(domainId = this.id, productId = product.id))
+        this.recordEvent(SubscriptionRequeted(domainId = this.id, productId = product.id))
         return subscription
     }
 
@@ -81,7 +82,7 @@ class Customer private constructor(
                 ?.apply { this.activate() }
                 ?: throw SubscriptionNotFoundForProductIdException(customerId = id, productId = productId)
 
-        // TODO: send event to subscription activated
+        this.recordEvent(SubscriptionActivated(domainId = this.id, productId = productId))
         return subscription
     }
 

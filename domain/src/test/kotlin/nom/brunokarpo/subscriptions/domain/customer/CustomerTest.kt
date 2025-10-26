@@ -3,7 +3,8 @@ package nom.brunokarpo.subscriptions.domain.customer
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerDeactivated
-import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
+import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionRequeted
+import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionActivated
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
@@ -63,7 +64,7 @@ class CustomerTest {
         assertEquals(SubscriptionStatus.REQUESTED, subscription.status)
 
         // validate domain event
-        val event = customer.domainEvents().firstOrNull { ev -> ev is ProductSubscribed } as ProductSubscribed
+        val event = customer.domainEvents().firstOrNull { ev -> ev is SubscriptionRequeted } as SubscriptionRequeted
         assertNotNull(event)
         assertEquals(customerId, event.domainId)
         assertNotNull(event.occurredOn)
@@ -178,6 +179,12 @@ class CustomerTest {
 
         assertEquals(product.id, subscription.productId)
         assertEquals(SubscriptionStatus.ACTIVE, subscription.status)
+
+        val event = customer.domainEvents().firstOrNull { ev -> ev is SubscriptionActivated } as SubscriptionActivated
+        assertNotNull(event)
+        assertEquals(customer.id, event.domainId)
+        assertEquals(product.id, event.productId)
+        assertNotNull(event.occurredOn)
     }
 
     @Test
@@ -193,6 +200,9 @@ class CustomerTest {
             }
 
         assertEquals("Customer with id '${customer.id}' does not have a subscription with product id '$productId'", exception.message)
+
+        val event = customer.domainEvents().firstOrNull { ev -> ev is SubscriptionActivated } as SubscriptionActivated?
+        assertNull(event)
     }
 
     @Test
