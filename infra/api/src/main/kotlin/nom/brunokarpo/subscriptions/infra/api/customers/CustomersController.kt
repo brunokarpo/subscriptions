@@ -1,5 +1,6 @@
 package nom.brunokarpo.subscriptions.infra.api.customers
 
+import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
@@ -32,6 +33,7 @@ class CustomersController(
     private val subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase,
     private val retrieveCustomersSubscriptionByStatusUseCase: RetrieveCustomersSubscriptionsRequestedUseCase,
     private val customerActivateUseCase: CustomerActivateUseCase,
+    private val activateSubscriptionUseCase: ActivateSubscriptionUseCase,
 ) {
     @PostMapping
     suspend fun createCustomer(
@@ -53,6 +55,24 @@ class CustomersController(
             )
 
         return ResponseEntity.status(201).body(responseCustomerDto)
+    }
+
+    @PatchMapping("/{customerId}/activate")
+    suspend fun activateCustomer(
+        @PathVariable customerId: String,
+    ): ResponseEntity<ResponseCustomerDto> {
+        val input = CustomerActivateUseCase.Input(customerId = customerId)
+
+        val output = customerActivateUseCase.execute(input)
+
+        return ResponseEntity.ok(
+            ResponseCustomerDto(
+                id = output.customerId,
+                name = output.name,
+                email = output.email,
+                activeUntil = output.activeUntil,
+            ),
+        )
     }
 
     @PostMapping("/{customerId}/products")
@@ -104,22 +124,18 @@ class CustomersController(
         return ResponseEntity.ok(responseSubscriptionsStatusDto)
     }
 
-    // TODO: criar endpoint para ativar assinatura (PATCH /customers/{customerId}/subscriptions/{productId}/activate)
-
-    @PatchMapping("/{customerId}/activate")
-    suspend fun activateCustomer(
+    @PatchMapping("/{customerId}/subscriptions/{productId}/activate")
+    suspend fun updateCustomerSubscription(
         @PathVariable customerId: String,
-    ): ResponseEntity<ResponseCustomerDto> {
-        val input = CustomerActivateUseCase.Input(customerId = customerId)
-
-        val output = customerActivateUseCase.execute(input)
-
+        @PathVariable productId: String,
+    ): ResponseEntity<ResponseSubscriptionsStatusDto.SubscriptionStatusDto> {
+        val input = ActivateSubscriptionUseCase.Input(customerId = customerId, productId = productId)
+        val output = activateSubscriptionUseCase.execute(input)
         return ResponseEntity.ok(
-            ResponseCustomerDto(
-                id = output.customerId,
-                name = output.name,
-                email = output.email,
-                activeUntil = output.activeUntil,
+            ResponseSubscriptionsStatusDto.SubscriptionStatusDto(
+                customerId = output.customerId,
+                productId = output.productId,
+                status = output.status,
             ),
         )
     }

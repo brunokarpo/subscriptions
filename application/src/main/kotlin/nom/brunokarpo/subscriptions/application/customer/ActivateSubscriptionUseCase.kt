@@ -11,7 +11,7 @@ import nom.brunokarpo.subscriptions.domain.product.ProductId
 class ActivateSubscriptionUseCase(
     private val customerRepository: CustomerRepository,
 ) : UseCase<ActivateSubscriptionUseCase.Input, ActivateSubscriptionUseCase.Output> {
-    @Throws(SubscriptionNotFoundForProductIdException::class)
+    @Throws(SubscriptionNotFoundForProductIdException::class, CustomerByIdNotFoundException::class)
     override suspend fun execute(input: Input): Output {
         val customerId = CustomerId.from(input.customerId)
         val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)

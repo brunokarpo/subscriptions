@@ -1,6 +1,7 @@
 package nom.brunokarpo.subscriptions.infra.api.customers
 
 import io.mockk.coEvery
+import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.CustomerActivateUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveCustomersSubscriptionsRequestedUseCase
@@ -231,6 +232,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
         // given
         val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
 
+
         // when
         coEvery {
             retrieveCustomersSubscriptionByStatusUseCase.execute(any())
@@ -280,4 +282,35 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .jsonPath("$.email")
             .isEqualTo(customerEmail)
     }
+
+    @Test
+    fun `should activate subscription`() {
+        val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+        val productId = "c129a079-3bdb-46e7-b578-4a96add93664"
+
+        coEvery {
+            activateSubscriptionUseCase.execute(any())
+        } returns ActivateSubscriptionUseCase.Output(
+            customerId = customerId,
+            productId = productId,
+            status = "ACTIVE",
+        )
+
+        client
+            .patch()
+            .uri("/v1/customers/$customerId/subscriptions/$productId/activate")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.customerId")
+            .isEqualTo(customerId)
+            .jsonPath("$.productId")
+            .isEqualTo(productId)
+            .jsonPath("$.status")
+            .isEqualTo("ACTIVE")
+    }
+
+    // TODO: test error cases (SubscriptionNotFoundForProductIdException::class, CustomerByIdNotFoundException::class)
 }

@@ -7,6 +7,7 @@ data class ResponseSubscriptionsStatusDto(
     val subscriptions: List<SubscriptionStatusDto>,
 ) {
     data class SubscriptionStatusDto(
+        val customerId: String? = null,
         val productId: String,
         val status: String,
     )
