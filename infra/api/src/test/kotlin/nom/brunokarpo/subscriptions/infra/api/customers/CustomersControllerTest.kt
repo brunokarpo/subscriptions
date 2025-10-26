@@ -12,12 +12,15 @@ import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerUniq
 import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
 import nom.brunokarpo.subscriptions.domain.common.DomainException
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
+import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
+import nom.brunokarpo.subscriptions.domain.product.ProductId
 import nom.brunokarpo.subscriptions.infra.api.ApiConfigurationTest
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestCreateCustomerDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestProductSubscriptionDto
 import org.junit.jupiter.api.Test
 import org.springframework.http.MediaType
 import java.lang.Exception
+import java.util.UUID
 
 class CustomersControllerTest : ApiConfigurationTest() {
     @Test
@@ -312,5 +315,45 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .isEqualTo("ACTIVE")
     }
 
-    // TODO: test error cases (SubscriptionNotFoundForProductIdException::class, CustomerByIdNotFoundException::class)
+    @Test
+    fun `should throw not found status when customer does not find`() {
+        val customerId = UUID.randomUUID().toString()
+        val productId = UUID.randomUUID().toString()
+
+        coEvery {
+            activateSubscriptionUseCase.execute(any())
+        } throws CustomerByIdNotFoundException(customerId = CustomerId.from(customerId))
+
+        client
+            .patch()
+            .uri("/v1/customers/$customerId/subscriptions/$productId/activate")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound
+            .expectBody()
+            .jsonPath("$.message")
+            .isEqualTo("Customer with id '$customerId' does not exists!")
+    }
+
+    @Test
+    fun `should throw not found status when customer does not have subscription to product`() {
+        val customerId = UUID.randomUUID().toString()
+        val productId = UUID.randomUUID().toString()
+
+        coEvery {
+            activateSubscriptionUseCase.execute(any())
+        } throws SubscriptionNotFoundForProductIdException(customerId = CustomerId.from(customerId), productId = ProductId.from(productId))
+
+        client
+            .patch()
+            .uri("/v1/customers/$customerId/subscriptions/$productId/activate")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isNotFound
+            .expectBody()
+            .jsonPath("$.message")
+            .isEqualTo("Customer with id '$customerId' does not have a subscription with product id '$productId'")
+    }
 }

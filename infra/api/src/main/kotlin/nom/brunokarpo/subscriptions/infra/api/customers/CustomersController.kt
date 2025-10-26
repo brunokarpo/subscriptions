@@ -8,6 +8,7 @@ import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCusto
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
 import nom.brunokarpo.subscriptions.application.usecases.ApplicationException
 import nom.brunokarpo.subscriptions.domain.common.DomainException
+import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestCreateCustomerDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestProductSubscriptionDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.ResponseCustomerDto
@@ -142,6 +143,15 @@ class CustomersController(
 
     @ExceptionHandler(CustomerByIdNotFoundException::class)
     fun handleApplicationException(ex: CustomerByIdNotFoundException): ResponseEntity<Map<String, String>> =
+        ResponseEntity
+            .status(
+                HttpStatus.NOT_FOUND,
+            ).body(
+                mapOf("message" to ex.message!!),
+            )
+
+    @ExceptionHandler(SubscriptionNotFoundForProductIdException::class)
+    fun handleApplicationException(ex: SubscriptionNotFoundForProductIdException): ResponseEntity<Map<String, String>> =
         ResponseEntity
             .status(
                 HttpStatus.NOT_FOUND,
