@@ -3,6 +3,7 @@ package nom.brunokarpo.subscriptions.domain.customer
 import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
+import nom.brunokarpo.subscriptions.domain.customer.events.CustomerDeactivated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
@@ -34,7 +35,7 @@ class Customer private constructor(
          * For business logic purposes use #create(name: String, email: String) method
          */
         fun create(
-            id: CustomerId,
+            id: CustomerId = CustomerId.unique(),
             name: String,
             email: String,
             active: Boolean = false,
@@ -79,6 +80,8 @@ class Customer private constructor(
                 .firstOrNull { subscription -> subscription.productId == productId }
                 ?.apply { this.activate() }
                 ?: throw SubscriptionNotFoundForProductIdException(customerId = id, productId = productId)
+
+        // TODO: send event to subscription activated
         return subscription
     }
 
@@ -89,6 +92,15 @@ class Customer private constructor(
         this.active = true
         this.activeUntil = ZonedDateTime.now().plusDays(30)
         this.recordEvent(CustomerActivated(domainId = this.id))
+    }
+
+    fun deactivate() {
+        if (!this.active) {
+            return
+        }
+        this.active = false
+        this.activeUntil = null
+        this.recordEvent(CustomerDeactivated(domainId = this.id))
     }
 
     fun activationKey(): ActivationKey {

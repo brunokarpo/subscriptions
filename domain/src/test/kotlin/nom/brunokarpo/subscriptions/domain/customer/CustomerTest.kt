@@ -2,6 +2,7 @@ package nom.brunokarpo.subscriptions.domain.customer
 
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
+import nom.brunokarpo.subscriptions.domain.customer.events.CustomerDeactivated
 import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
@@ -10,7 +11,9 @@ import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionSt
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -190,5 +193,41 @@ class CustomerTest {
             }
 
         assertEquals("Customer with id '${customer.id}' does not have a subscription with product id '$productId'", exception.message)
+    }
+
+    @Test
+    fun `should deactivate customer`() {
+        // given an active customer
+        val customer = Customer.create(name = "Test", email = "")
+        customer.activate()
+        assertTrue(customer.active)
+        assertNotNull(customer.activeUntil)
+
+        // when deactivate
+        customer.deactivate()
+
+        // then
+        assertFalse(customer.active)
+        assertNull(customer.activeUntil)
+
+        val event = customer.domainEvents().firstOrNull { ev -> ev is CustomerDeactivated } as CustomerDeactivated
+        assertNotNull(event)
+        assertEquals(customer.id, event.domainId)
+        assertNotNull(event.occurredOn)
+    }
+
+    @Test
+    fun `should not generate deactivate customer event when customer is already deactivated`() {
+        // given a deactivated customer
+        val customer = Customer.create(name = "Test", email = "")
+        assertFalse(customer.active)
+        assertNull(customer.activeUntil)
+
+        customer.deactivate()
+        assertFalse(customer.active)
+        assertNull(customer.activeUntil)
+
+        val events = customer.domainEvents().firstOrNull { ev -> ev is CustomerDeactivated } as CustomerDeactivated?
+        assertNull(events)
     }
 }
