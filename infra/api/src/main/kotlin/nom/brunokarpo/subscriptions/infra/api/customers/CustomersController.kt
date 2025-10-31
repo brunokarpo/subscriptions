@@ -9,6 +9,7 @@ import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerById
 import nom.brunokarpo.subscriptions.application.usecases.ApplicationException
 import nom.brunokarpo.subscriptions.domain.common.DomainException
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
+import nom.brunokarpo.subscriptions.infra.api.customers.CustomersController.Companion.BASE_URL
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestCreateCustomerDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.RequestProductSubscriptionDto
 import nom.brunokarpo.subscriptions.infra.api.customers.dtos.ResponseCustomerDto
@@ -27,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/v1/customers")
+@RequestMapping(BASE_URL)
 class CustomersController(
     private val createNewCustomerUseCase: CreateNewCustomerUseCase,
     private val subscribeProductToCustomerUseCase: SubscribeProductToCustomerUseCase,
@@ -35,6 +36,14 @@ class CustomersController(
     private val customerActivateUseCase: ActivateCustomerUseCase,
     private val activateSubscriptionUseCase: ActivateSubscriptionUseCase,
 ) {
+
+    companion object {
+        const val BASE_URL = "/v1/customers"
+        const val ACTIVATE_CUSTOMER = "/{customerId}/activate"
+        const val SUBSCRIPTIONS = "/{customerId}/subscriptions"
+        const val ACTIVATE_SUBSCRIPTION = "$SUBSCRIPTIONS/products/{productId}/activate"
+    }
+
     @PostMapping
     suspend fun createCustomer(
         @RequestBody requestCreateCustomerDto: RequestCreateCustomerDto,
@@ -57,7 +66,7 @@ class CustomersController(
         return ResponseEntity.status(201).body(responseCustomerDto)
     }
 
-    @PatchMapping("/{customerId}/activate")
+    @PatchMapping(ACTIVATE_CUSTOMER)
     suspend fun activateCustomer(
         @PathVariable customerId: String,
     ): ResponseEntity<ResponseCustomerDto> {
@@ -75,7 +84,7 @@ class CustomersController(
         )
     }
 
-    @PostMapping("/{customerId}/products")
+    @PostMapping(SUBSCRIPTIONS)
     suspend fun subscribeProductToCustomer(
         @RequestBody requestProductSubscriptionDto: RequestProductSubscriptionDto,
         @PathVariable customerId: String,
@@ -98,7 +107,7 @@ class CustomersController(
         return ResponseEntity.status(201).body(customerDto)
     }
 
-    @GetMapping("/{customerId}/subscriptions")
+    @GetMapping(SUBSCRIPTIONS)
     suspend fun getCustomerSubscriptions(
         @PathVariable customerId: String,
         @RequestParam(required = true) status: String,
@@ -124,7 +133,7 @@ class CustomersController(
         return ResponseEntity.ok(responseSubscriptionsStatusDto)
     }
 
-    @PatchMapping("/{customerId}/subscriptions/{productId}/activate")
+    @PatchMapping(ACTIVATE_SUBSCRIPTION)
     suspend fun updateCustomerSubscription(
         @PathVariable customerId: String,
         @PathVariable productId: String,

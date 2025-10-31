@@ -92,7 +92,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         client
             .post()
-            .uri("/v1/customers/$customerId/products")
+            .uri("/v1/customers/$customerId/subscriptions")
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(requestProductSubscriptionDto)
             .exchange()
@@ -118,7 +118,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         client
             .post()
-            .uri("/v1/customers/$customerId/products")
+            .uri("/v1/customers/$customerId/subscriptions")
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(requestProductSubscriptionDto)
             .exchange()
@@ -143,7 +143,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         client
             .post()
-            .uri("/v1/customers/$customerId/products")
+            .uri("/v1/customers/$customerId/subscriptions")
             .accept(MediaType.APPLICATION_JSON)
             .bodyValue(requestProductSubscriptionDto)
             .exchange()
@@ -299,7 +299,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         client
             .patch()
-            .uri("/v1/customers/$customerId/subscriptions/$productId/activate")
+            .uri("/v1/customers/$customerId/subscriptions/products/$productId/activate")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -324,7 +324,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         client
             .patch()
-            .uri("/v1/customers/$customerId/subscriptions/$productId/activate")
+            .uri("/v1/customers/$customerId/subscriptions/products/$productId/activate")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
@@ -345,7 +345,7 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         client
             .patch()
-            .uri("/v1/customers/$customerId/subscriptions/$productId/activate")
+            .uri("/v1/customers/$customerId/subscriptions/products/$productId/activate")
             .accept(MediaType.APPLICATION_JSON)
             .exchange()
             .expectStatus()
