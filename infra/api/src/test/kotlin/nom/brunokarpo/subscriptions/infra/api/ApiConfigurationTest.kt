@@ -4,6 +4,7 @@ import com.ninjasquad.springmockk.MockkBean
 import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.DeactivateCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveSubscriptionsByStatusUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.product.CreateNewProductUseCase
@@ -34,6 +35,9 @@ class ApiConfigurationTest {
 
     @MockkBean
     lateinit var activateSubscriptionUseCase: ActivateSubscriptionUseCase
+
+    @MockkBean
+    lateinit var deactivateCustomerUseCase: DeactivateCustomerUseCase
 
     @Autowired
     lateinit var client: WebTestClient

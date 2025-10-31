@@ -3,6 +3,7 @@ package nom.brunokarpo.subscriptions.infra.api.customers
 import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.DeactivateCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveSubscriptionsByStatusUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
@@ -35,11 +36,13 @@ class CustomersController(
     private val retrieveCustomersSubscriptionByStatusUseCase: RetrieveSubscriptionsByStatusUseCase,
     private val customerActivateUseCase: ActivateCustomerUseCase,
     private val activateSubscriptionUseCase: ActivateSubscriptionUseCase,
+    private val deactivateCustomerUseCase: DeactivateCustomerUseCase
 ) {
 
     companion object {
         const val BASE_URL = "/v1/customers"
         const val ACTIVATE_CUSTOMER = "/{customerId}/activate"
+        const val DEACTIVATE_CUSTOMER = "/{customerId}/deactivate"
         const val SUBSCRIPTIONS = "/{customerId}/subscriptions"
         const val ACTIVATE_SUBSCRIPTION = "$SUBSCRIPTIONS/products/{productId}/activate"
     }
@@ -80,6 +83,24 @@ class CustomersController(
                 name = output.name,
                 email = output.email,
                 activeUntil = output.activeUntil,
+            ),
+        )
+    }
+
+    @PatchMapping(DEACTIVATE_CUSTOMER)
+    suspend fun deactivateCustomer(
+        @PathVariable customerId: String,
+    ): ResponseEntity<ResponseCustomerDto> {
+        val input = DeactivateCustomerUseCase.Input(customerId = customerId)
+
+        val output = deactivateCustomerUseCase.execute(input)
+
+        return ResponseEntity.ok(
+            ResponseCustomerDto(
+                id = output.customerId,
+                name = output.name,
+                email = output.email,
+                active = output.active,
             ),
         )
     }

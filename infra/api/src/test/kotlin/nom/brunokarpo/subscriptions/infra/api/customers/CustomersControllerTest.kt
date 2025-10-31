@@ -4,6 +4,7 @@ import io.mockk.coEvery
 import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
+import nom.brunokarpo.subscriptions.application.customer.DeactivateCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveSubscriptionsByStatusUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
@@ -28,11 +29,11 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val expectedEmail = "sara@email.com"
 
         coEvery { createNewCustomerUseCase.execute(any()) } returns
-            CreateNewCustomerUseCase.Output(
-                id = expectedId,
-                name = expectedName,
-                email = expectedEmail,
-            )
+                CreateNewCustomerUseCase.Output(
+                    id = expectedId,
+                    name = expectedName,
+                    email = expectedEmail,
+                )
 
         val clientDto = RequestCreateCustomerDto(name = expectedName, email = expectedEmail)
 
@@ -82,11 +83,11 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val expectedEmail = "<EMAIL>"
 
         coEvery { subscribeProductToCustomerUseCase.execute(any()) } returns
-            SubscribeProductToCustomerUseCase.Output(
-                email = expectedEmail,
-                productName = productName,
-                subscriptionStatus = "REQUESTED",
-            )
+                SubscribeProductToCustomerUseCase.Output(
+                    email = expectedEmail,
+                    productName = productName,
+                    subscriptionStatus = "REQUESTED",
+                )
 
         val requestProductSubscriptionDto = RequestProductSubscriptionDto(productName = productName)
 
@@ -135,9 +136,9 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val productName = "PRODUCT_ID_1"
 
         coEvery { subscribeProductToCustomerUseCase.execute(any()) } throws
-            CustomerByIdNotFoundException(
-                CustomerId.from(customerId),
-            )
+                CustomerByIdNotFoundException(
+                    CustomerId.from(customerId),
+                )
 
         val requestProductSubscriptionDto = RequestProductSubscriptionDto(productName = productName)
 
@@ -165,22 +166,22 @@ class CustomersControllerTest : ApiConfigurationTest() {
         coEvery {
             retrieveCustomersSubscriptionByStatusUseCase.execute(any())
         } returns
-            RetrieveSubscriptionsByStatusUseCase.Output(
-                customerId = customerId,
-                customerName = customerName,
-                customerEmail = customerEmail,
-                subscriptions =
-                    listOf(
-                        RetrieveSubscriptionsByStatusUseCase.Output.SubscriptionStatus(
-                            productId = productId1,
-                            status = "REQUESTED",
+                RetrieveSubscriptionsByStatusUseCase.Output(
+                    customerId = customerId,
+                    customerName = customerName,
+                    customerEmail = customerEmail,
+                    subscriptions =
+                        listOf(
+                            RetrieveSubscriptionsByStatusUseCase.Output.SubscriptionStatus(
+                                productId = productId1,
+                                status = "REQUESTED",
+                            ),
+                            RetrieveSubscriptionsByStatusUseCase.Output.SubscriptionStatus(
+                                productId = productId2,
+                                status = "REQUESTED",
+                            ),
                         ),
-                        RetrieveSubscriptionsByStatusUseCase.Output.SubscriptionStatus(
-                            productId = productId2,
-                            status = "REQUESTED",
-                        ),
-                    ),
-            )
+                )
 
         client
             .get()
@@ -259,12 +260,12 @@ class CustomersControllerTest : ApiConfigurationTest() {
         val activeUntil = "2021-08-31T23:59:59"
 
         coEvery { customerActivateUseCase.execute(any()) } returns
-            ActivateCustomerUseCase.Output(
-                customerId = customerId,
-                name = customerName,
-                email = customerEmail,
-                activeUntil = activeUntil,
-            )
+                ActivateCustomerUseCase.Output(
+                    customerId = customerId,
+                    name = customerName,
+                    email = customerEmail,
+                    activeUntil = activeUntil,
+                )
 
         client
             .patch()
@@ -282,6 +283,39 @@ class CustomersControllerTest : ApiConfigurationTest() {
             .isEqualTo(customerName)
             .jsonPath("$.email")
             .isEqualTo(customerEmail)
+    }
+
+    @Test
+    fun `should deactivate a customer by identifier`() {
+        val customerId = "c129a079-3bdb-46e7-b578-4a96add93664"
+        val customerName = "Customer Name"
+        val customerEmail = "customer@email.com"
+        val active = false
+
+        coEvery { deactivateCustomerUseCase.execute(any()) } returns
+                DeactivateCustomerUseCase.Output(
+                    customerId = customerId,
+                    name = customerName,
+                    email = customerEmail,
+                    active = active,
+                )
+
+        client
+            .patch()
+            .uri("/v1/customers/$customerId/deactivate")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(customerId)
+            .jsonPath("$.name")
+            .isEqualTo(customerName)
+            .jsonPath("$.email")
+            .isEqualTo(customerEmail)
+            .jsonPath("$.active")
+            .isEqualTo(active)
     }
 
     @Test
@@ -341,7 +375,10 @@ class CustomersControllerTest : ApiConfigurationTest() {
 
         coEvery {
             activateSubscriptionUseCase.execute(any())
-        } throws SubscriptionNotFoundForProductIdException(customerId = CustomerId.from(customerId), productId = ProductId.from(productId))
+        } throws SubscriptionNotFoundForProductIdException(
+            customerId = CustomerId.from(customerId),
+            productId = ProductId.from(productId)
+        )
 
         client
             .patch()
