@@ -18,18 +18,18 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.code.style>official</kotlin.code.style>
-        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
+        <java.version>21</java.version>
 
         <kotlin-version>2.1.21</kotlin-version>
-        <junit-jupiter.version>5.10.0</junit-jupiter.version>
+        <kotlin.code.style>official</kotlin.code.style>
+        <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
+        <kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
+
+        <mockk-jvm.version>1.13.13</mockk-jvm.version>
+        <junit-jupiter.version>6.0.0</junit-jupiter.version>
 
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <mockk-jvm.version>1.13.13</mockk-jvm.version>
-        <java.version>21</java.version>
-        <kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
-        <junit-jupiter.version>6.0.0</junit-jupiter.version>
     </properties>
 
     <dependencyManagement>
