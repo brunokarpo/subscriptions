@@ -8,5 +8,5 @@ import java.time.ZonedDateTime
 class SubscriptionActivated(
     override val domainId: CustomerId,
     override val occurredOn: ZonedDateTime = ZonedDateTime.now(),
-    val productId: ProductId
+    val productId: ProductId,
 ) : DomainEvent

@@ -15,7 +15,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class DeactivateCustomerUseCaseTest {
-
     private lateinit var repository: CustomerRepository
 
     private lateinit var sut: DeactivateCustomerUseCase
@@ -27,39 +26,41 @@ class DeactivateCustomerUseCaseTest {
     }
 
     @Test
-    fun `should deactivate customer`() = runTest {
-        // given
-        val customer = CustomerFixture.createCustomer(active = true)
+    fun `should deactivate customer`() =
+        runTest {
+            // given
+            val customer = CustomerFixture.createCustomer(active = true)
 
-        coEvery { repository.findById(customer.id) } returns customer
+            coEvery { repository.findById(customer.id) } returns customer
 
-        // when
-        val input = DeactivateCustomerUseCase.Input(customerId = customer.id.toString())
-        val output = sut.execute(input)
+            // when
+            val input = DeactivateCustomerUseCase.Input(customerId = customer.id.toString())
+            val output = sut.execute(input)
 
-        // then
-        assertEquals(customer.id.toString(), output.customerId)
-        assertEquals(customer.name, output.name)
-        assertEquals(customer.email, output.email)
-        assertFalse(output.active)
+            // then
+            assertEquals(customer.id.toString(), output.customerId)
+            assertEquals(customer.name, output.name)
+            assertEquals(customer.email, output.email)
+            assertFalse(output.active)
 
-        assertFalse { customer.active }
+            assertFalse { customer.active }
 
-        coVerify(exactly = 1) { repository.save(customer) }
-    }
+            coVerify(exactly = 1) { repository.save(customer) }
+        }
 
     @Test
-    fun `should throw customer by id not found exception when customer does not exists`() = runTest {
-        // given
-        val customerId = CustomerId.unique()
-        coEvery { repository.findById(customerId) } returns null
+    fun `should throw customer by id not found exception when customer does not exists`() =
+        runTest {
+            // given
+            val customerId = CustomerId.unique()
+            coEvery { repository.findById(customerId) } returns null
 
-        // when
-        val input = DeactivateCustomerUseCase.Input(customerId = customerId.toString())
-        val exception = assertThrows<CustomerByIdNotFoundException> { sut.execute(input) }
+            // when
+            val input = DeactivateCustomerUseCase.Input(customerId = customerId.toString())
+            val exception = assertThrows<CustomerByIdNotFoundException> { sut.execute(input) }
 
-        // then
-        assertEquals("Customer with id '$customerId' does not exists!", exception.message)
-        coVerify(exactly = 0) { repository.save(any()) }
-    }
+            // then
+            assertEquals("Customer with id '$customerId' does not exists!", exception.message)
+            coVerify(exactly = 0) { repository.save(any()) }
+        }
 }

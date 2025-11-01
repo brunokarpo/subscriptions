@@ -219,24 +219,25 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
         }
 
     @Test
-    fun `should update subscription status when subscription is updated`() = runTest {
-        loadDatabase("/create_products.sql")
+    fun `should update subscription status when subscription is updated`() =
+        runTest {
+            loadDatabase("/create_products.sql")
 
-        val customerId = CustomerId.unique()
-        val name = "name"
-        val email = "email"
-        val customer = Customer.create(id = customerId, name = name, email = email)
-        customer.activate()
+            val customerId = CustomerId.unique()
+            val name = "name"
+            val email = "email"
+            val customer = Customer.create(id = customerId, name = name, email = email)
+            customer.activate()
 
-        val productId = ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7f")
-        customer.subscribe(Product.create(productId, ""))
-        sut.save(customer)
+            val productId = ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7f")
+            customer.subscribe(Product.create(productId, ""))
+            sut.save(customer)
 
-        customer.activeSubscription(productId)
-        sut.save(customer)
+            customer.activeSubscription(productId)
+            sut.save(customer)
 
-        val result = sut.findById(customerId)
-        assertNotNull(result)
-        assertTrue { result!!.subscriptions.any { sub -> sub.productId == productId && sub.status == SubscriptionStatus.ACTIVE } }
-    }
+            val result = sut.findById(customerId)
+            assertNotNull(result)
+            assertTrue { result!!.subscriptions.any { sub -> sub.productId == productId && sub.status == SubscriptionStatus.ACTIVE } }
+        }
 }

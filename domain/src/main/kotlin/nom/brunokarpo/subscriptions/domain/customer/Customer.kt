@@ -4,8 +4,8 @@ import nom.brunokarpo.subscriptions.domain.common.AggregateRoot
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerDeactivated
-import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionRequeted
 import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionActivated
+import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionRequeted
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
 import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription

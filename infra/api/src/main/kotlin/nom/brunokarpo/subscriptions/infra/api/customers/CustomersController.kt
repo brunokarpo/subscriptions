@@ -1,8 +1,8 @@
 package nom.brunokarpo.subscriptions.infra.api.customers
 
+import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.ActivateSubscriptionUseCase
 import nom.brunokarpo.subscriptions.application.customer.CreateNewCustomerUseCase
-import nom.brunokarpo.subscriptions.application.customer.ActivateCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.DeactivateCustomerUseCase
 import nom.brunokarpo.subscriptions.application.customer.RetrieveSubscriptionsByStatusUseCase
 import nom.brunokarpo.subscriptions.application.customer.SubscribeProductToCustomerUseCase
@@ -36,9 +36,8 @@ class CustomersController(
     private val retrieveCustomersSubscriptionByStatusUseCase: RetrieveSubscriptionsByStatusUseCase,
     private val customerActivateUseCase: ActivateCustomerUseCase,
     private val activateSubscriptionUseCase: ActivateSubscriptionUseCase,
-    private val deactivateCustomerUseCase: DeactivateCustomerUseCase
+    private val deactivateCustomerUseCase: DeactivateCustomerUseCase,
 ) {
-
     companion object {
         const val BASE_URL = "/v1/customers"
         const val ACTIVATE_CUSTOMER = "/{customerId}/activate"
