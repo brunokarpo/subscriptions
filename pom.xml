@@ -29,6 +29,7 @@
         <mockk-jvm.version>1.13.13</mockk-jvm.version>
         <java.version>21</java.version>
         <kotlinx-coroutines.version>1.8.1</kotlinx-coroutines.version>
+        <junit-jupiter.version>6.0.0</junit-jupiter.version>
     </properties>
 
     <dependencyManagement>
@@ -85,6 +86,7 @@
         <dependency>
             <groupId>io.mockk</groupId>
             <artifactId>mockk-jvm</artifactId>
+            <scope>test</scope>
             <version>${mockk-jvm.version}</version>
         </dependency>
     </dependencies>
@@ -117,11 +119,11 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.5.4</version>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
+                <version>3.5.4</version>
             </plugin>
         </plugins>
     </build>

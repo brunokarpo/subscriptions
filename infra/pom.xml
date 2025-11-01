@@ -21,7 +21,7 @@
     </modules>
 
     <properties>
-        <spring-boot-dependencies.version>3.5.6</spring-boot-dependencies.version>
+        <spring-boot-dependencies.version>3.5.7</spring-boot-dependencies.version>
     </properties>
 
     <dependencies>
