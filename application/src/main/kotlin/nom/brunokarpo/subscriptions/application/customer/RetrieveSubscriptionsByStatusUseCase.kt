@@ -1,0 +1,44 @@
+package nom.brunokarpo.subscriptions.application.customer
+
+import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
+import nom.brunokarpo.subscriptions.application.usecases.UseCase
+import nom.brunokarpo.subscriptions.domain.customer.CustomerId
+import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
+
+class RetrieveSubscriptionsByStatusUseCase(
+    private val customerRepository: CustomerRepository,
+) : UseCase<RetrieveSubscriptionsByStatusUseCase.Input, RetrieveSubscriptionsByStatusUseCase.Output> {
+    @Throws(CustomerByIdNotFoundException::class)
+    override suspend fun execute(input: Input): Output {
+        val customerId = CustomerId.from(input.customerId)
+        val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
+
+        val subscriptions: List<Subscription> = customer.getSubscriptionByStatus(SubscriptionStatus.of(input.status))
+
+        return Output(
+            customerId = customer.id.toString(),
+            customerName = customer.name,
+            customerEmail = customer.email,
+            subscriptions = subscriptions.map { Output.SubscriptionStatus(it.productId.toString(), it.status.name) },
+        )
+    }
+
+    class Input(
+        val customerId: String,
+        val status: String,
+    )
+
+    class Output(
+        val customerId: String,
+        val customerName: String,
+        val customerEmail: String,
+        val subscriptions: List<SubscriptionStatus>,
+    ) {
+        class SubscriptionStatus(
+            val productId: String,
+            val status: String,
+        )
+    }
+}

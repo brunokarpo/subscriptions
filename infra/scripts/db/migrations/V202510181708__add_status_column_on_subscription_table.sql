@@ -1,0 +1,1 @@
+alter table subscription add column status text;

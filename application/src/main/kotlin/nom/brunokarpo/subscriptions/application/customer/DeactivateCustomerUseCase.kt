@@ -4,31 +4,28 @@ import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerById
 import nom.brunokarpo.subscriptions.application.usecases.UseCase
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
-import java.time.format.DateTimeFormatter
 
-class CustomerActivateUseCase(
-    private val customerRepository: CustomerRepository,
-) : UseCase<CustomerActivateUseCase.Input, CustomerActivateUseCase.Output> {
+class DeactivateCustomerUseCase(
+    private val customerRepository: CustomerRepository
+) : UseCase<DeactivateCustomerUseCase.Input, DeactivateCustomerUseCase.Output> {
+
+    @Throws(CustomerByIdNotFoundException::class)
     override suspend fun execute(input: Input): Output {
         val customerId = CustomerId.from(input.customerId)
-
         val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
-        customer.activate()
+
+        customer.deactivate()
 
         customerRepository.save(customer)
 
         return Output(
-            customerId = customerId.toString(),
-            activeUntil = customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            customerId = customer.id.toString(),
+            name = customer.name,
+            email = customer.email,
+            active = customer.active
         )
     }
 
-    class Input(
-        val customerId: String,
-    )
-
-    class Output(
-        val customerId: String,
-        val activeUntil: String,
-    )
+    class Input(val customerId: String)
+    class Output(val customerId: String, val name: String, val email: String, val active: Boolean)
 }

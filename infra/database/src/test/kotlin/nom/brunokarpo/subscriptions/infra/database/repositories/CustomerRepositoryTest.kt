@@ -4,6 +4,9 @@ import kotlinx.coroutines.test.runTest
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
+import nom.brunokarpo.subscriptions.domain.product.Product
+import nom.brunokarpo.subscriptions.domain.product.ProductId
 import nom.brunokarpo.subscriptions.infra.database.DatabaseConfigurationTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -102,7 +105,7 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
         }
 
     @Test
-    fun `should update active and active untl of existent customer`() =
+    fun `should update active and active until of existent customer`() =
         runTest {
             loadDatabase("/create_customers.sql")
 
@@ -131,8 +134,8 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
     fun `should load the subscriptions from database`() =
         runTest {
             loadDatabase("/create_customers.sql")
-            loadDatabase("/create_subscriptions.sql")
             loadDatabase("/create_products.sql")
+            loadDatabase("/create_subscriptions.sql")
 
             // given
             val expectedEmail = "alice@email.com"
@@ -143,14 +146,97 @@ class CustomerRepositoryTest : DatabaseConfigurationTest() {
             // then
             assertNotNull(customer!!)
 
-            val activationKey = customer.activationKey()
-            assertNotNull(activationKey)
-            assertEquals(3, activationKey.products.size)
-            assertTrue(activationKey.products.contains("database product 2"))
-            assertTrue(activationKey.products.contains("database product 3"))
-            assertTrue(activationKey.products.contains("database product 4"))
+            assertEquals(3, customer.subscriptions.size)
+
+            assertNotNull(
+                customer.subscriptions.firstOrNull { sub ->
+                    sub.productName == "database product 2" &&
+                        sub.status == SubscriptionStatus.REQUESTED
+                },
+            )
+            assertNotNull(
+                customer.subscriptions.firstOrNull { sub ->
+                    sub.productName == "database product 3" &&
+                        sub.status == SubscriptionStatus.REQUESTED
+                },
+            )
+            assertNotNull(
+                customer.subscriptions.firstOrNull { sub ->
+                    sub.productName == "database product 4" &&
+                        sub.status == SubscriptionStatus.REQUESTED
+                },
+            )
 
             // verify if any domain event was generated
             assertTrue(customer.domainEvents().isEmpty())
         }
+
+    @Test
+    fun `should save customer with subscriptions`() =
+        runTest {
+            loadDatabase("/create_products.sql")
+
+            val customerId = CustomerId.unique()
+            val name = "name"
+            val email = "email"
+            val customer = Customer.create(id = customerId, name = name, email = email)
+            customer.activate()
+
+            customer.subscribe(Product.create(ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7f"), ""))
+            customer.subscribe(Product.create(ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7e"), ""))
+
+            sut.save(customer)
+
+            val result = sut.findById(customerId)
+            assertNotNull(result)
+            assertEquals(2, result!!.subscriptions.size)
+            assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7f" } }
+            assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7e" } }
+        }
+
+    @Test
+    fun `should update subscriptions when there was saved previously`() =
+        runTest {
+            loadDatabase("/create_products.sql")
+
+            val customerId = CustomerId.unique()
+            val name = "name"
+            val email = "email"
+            val customer = Customer.create(id = customerId, name = name, email = email)
+            customer.activate()
+
+            customer.subscribe(Product.create(ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7f"), ""))
+            sut.save(customer)
+
+            customer.subscribe(Product.create(ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7d"), ""))
+            sut.save(customer)
+
+            val result = sut.findById(customerId)
+            assertNotNull(result)
+            assertEquals(2, result!!.subscriptions.size)
+            assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7f" } }
+            assertTrue { result.subscriptions.any { sub -> sub.productId.toString() == "79e9eb45-2835-49c8-ad3b-c951b591bc7d" } }
+        }
+
+    @Test
+    fun `should update subscription status when subscription is updated`() = runTest {
+        loadDatabase("/create_products.sql")
+
+        val customerId = CustomerId.unique()
+        val name = "name"
+        val email = "email"
+        val customer = Customer.create(id = customerId, name = name, email = email)
+        customer.activate()
+
+        val productId = ProductId.from("79e9eb45-2835-49c8-ad3b-c951b591bc7f")
+        customer.subscribe(Product.create(productId, ""))
+        sut.save(customer)
+
+        customer.activeSubscription(productId)
+        sut.save(customer)
+
+        val result = sut.findById(customerId)
+        assertNotNull(result)
+        assertTrue { result!!.subscriptions.any { sub -> sub.productId == productId && sub.status == SubscriptionStatus.ACTIVE } }
+    }
 }

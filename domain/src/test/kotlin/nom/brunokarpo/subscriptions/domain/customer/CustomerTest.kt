@@ -2,11 +2,20 @@ package nom.brunokarpo.subscriptions.domain.customer
 
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerActivated
 import nom.brunokarpo.subscriptions.domain.customer.events.CustomerCreated
-import nom.brunokarpo.subscriptions.domain.customer.events.ProductSubscribed
+import nom.brunokarpo.subscriptions.domain.customer.events.CustomerDeactivated
+import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionRequeted
+import nom.brunokarpo.subscriptions.domain.customer.events.SubscriptionActivated
 import nom.brunokarpo.subscriptions.domain.customer.exceptions.CustomerNotActiveException
+import nom.brunokarpo.subscriptions.domain.customer.exceptions.SubscriptionNotFoundForProductIdException
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.Subscription
+import nom.brunokarpo.subscriptions.domain.customer.subscriptions.SubscriptionStatus
 import nom.brunokarpo.subscriptions.domain.product.Product
 import nom.brunokarpo.subscriptions.domain.product.ProductId
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.ZonedDateTime
@@ -33,7 +42,7 @@ class CustomerTest {
     }
 
     @Test
-    fun `should subscribe a product and generate an activation key`() {
+    fun `should subscribe a product`() {
         // given
         val customerId = CustomerId.unique()
         val expectedName = "Test"
@@ -44,19 +53,18 @@ class CustomerTest {
 
         val productId = ProductId.unique()
         val expectedProductName = "Product 1"
-        val product = Product.create(productId = productId, name = expectedProductName)
+        val product = Product.create(id = productId, name = expectedProductName)
 
         // when
-        customer.subscribe(product)
+        val subscription = customer.subscribe(product)
 
         // then
-        val activationKey: ActivationKey = customer.activationKey()
-        assertNotNull(activationKey)
-        assertEquals(expectedEmail, activationKey.email)
-        assertContains(activationKey.products, expectedProductName)
-        assertEquals(1, activationKey.products.size)
+        assertEquals(1, customer.subscriptions.size)
+        assertContains(customer.subscriptions, subscription)
+        assertEquals(SubscriptionStatus.REQUESTED, subscription.status)
 
-        val event = customer.domainEvents().firstOrNull { ev -> ev is ProductSubscribed } as ProductSubscribed
+        // validate domain event
+        val event = customer.domainEvents().firstOrNull { ev -> ev is SubscriptionRequeted } as SubscriptionRequeted
         assertNotNull(event)
         assertEquals(customerId, event.domainId)
         assertNotNull(event.occurredOn)
@@ -74,7 +82,7 @@ class CustomerTest {
 
         val productId = ProductId.unique()
         val expectedProductName = "Product 1"
-        val product = Product.create(productId = productId, name = expectedProductName)
+        val product = Product.create(id = productId, name = expectedProductName)
 
         // when
         val exception =
@@ -130,5 +138,106 @@ class CustomerTest {
         assertNotNull(event)
         assertEquals(customerId, event.domainId)
         assertNotNull(event.occurredOn)
+    }
+
+    @Test
+    fun `should retrieve customer's subscriptions by status`() {
+        // given
+        val customerId = CustomerId.unique()
+        val customer = Customer.create(id = customerId, name = "Test", email = "<EMAIL>")
+        customer.activate()
+
+        val product1Id = ProductId.unique()
+        val product1Name = "Product 1"
+        val product1 = Product.create(id = product1Id, name = product1Name)
+        customer.subscribe(product1)
+
+        val product2Id = ProductId.unique()
+        val product2Name = "Product 2"
+        val product2 = Product.create(id = product2Id, name = product2Name)
+        customer.subscribe(product2)
+
+        // when
+        val result: List<Subscription> = customer.getSubscriptionByStatus(SubscriptionStatus.REQUESTED)
+
+        // then
+        assertEquals(2, result.size)
+        assertTrue(result.any { it.productId == product1Id })
+        assertTrue(result.any { it.productId == product2Id })
+    }
+
+    @Test
+    fun `should activate subscription`() {
+        val customer = Customer.create(name = "Test", email = "")
+        customer.activate()
+
+        val product = Product.create(name = "Product 1")
+        customer.subscribe(product)
+
+        val subscription = customer.activeSubscription(product.id)
+        assertTrue(customer.subscriptions.contains(subscription))
+
+        assertEquals(product.id, subscription.productId)
+        assertEquals(SubscriptionStatus.ACTIVE, subscription.status)
+
+        val event = customer.domainEvents().firstOrNull { ev -> ev is SubscriptionActivated } as SubscriptionActivated
+        assertNotNull(event)
+        assertEquals(customer.id, event.domainId)
+        assertEquals(product.id, event.productId)
+        assertNotNull(event.occurredOn)
+    }
+
+    @Test
+    fun `should throw exception when try activate subscription to product id not requested`() {
+        val customer = Customer.create(name = "Test", email = "")
+        customer.activate()
+
+        val productId = ProductId.unique()
+
+        val exception =
+            assertThrows<SubscriptionNotFoundForProductIdException> {
+                customer.activeSubscription(productId)
+            }
+
+        assertEquals("Customer with id '${customer.id}' does not have a subscription with product id '$productId'", exception.message)
+
+        val event = customer.domainEvents().firstOrNull { ev -> ev is SubscriptionActivated } as SubscriptionActivated?
+        assertNull(event)
+    }
+
+    @Test
+    fun `should deactivate customer`() {
+        // given an active customer
+        val customer = Customer.create(name = "Test", email = "")
+        customer.activate()
+        assertTrue(customer.active)
+        assertNotNull(customer.activeUntil)
+
+        // when deactivate
+        customer.deactivate()
+
+        // then
+        assertFalse(customer.active)
+        assertNull(customer.activeUntil)
+
+        val event = customer.domainEvents().firstOrNull { ev -> ev is CustomerDeactivated } as CustomerDeactivated
+        assertNotNull(event)
+        assertEquals(customer.id, event.domainId)
+        assertNotNull(event.occurredOn)
+    }
+
+    @Test
+    fun `should not generate deactivate customer event when customer is already deactivated`() {
+        // given a deactivated customer
+        val customer = Customer.create(name = "Test", email = "")
+        assertFalse(customer.active)
+        assertNull(customer.activeUntil)
+
+        customer.deactivate()
+        assertFalse(customer.active)
+        assertNull(customer.activeUntil)
+
+        val events = customer.domainEvents().firstOrNull { ev -> ev is CustomerDeactivated } as CustomerDeactivated?
+        assertNull(events)
     }
 }

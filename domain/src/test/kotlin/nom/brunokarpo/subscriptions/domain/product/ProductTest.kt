@@ -32,7 +32,7 @@ class ProductTest {
         val name = "Product 1"
 
         // when
-        val product: Product = Product.create(productId = productId, name = name, emitEvent = false)
+        val product: Product = Product.create(id = productId, name = name, emitEvent = false)
 
         // then
         assertEquals(productId, product.id)

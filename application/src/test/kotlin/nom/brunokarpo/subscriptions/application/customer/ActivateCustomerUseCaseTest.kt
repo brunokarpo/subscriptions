@@ -18,16 +18,16 @@ import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
-class CustomerActivateUseCaseTest {
+class ActivateCustomerUseCaseTest {
     private lateinit var customerRepository: CustomerRepository
 
-    private lateinit var sut: CustomerActivateUseCase
+    private lateinit var sut: ActivateCustomerUseCase
 
     @BeforeEach
     fun setUp() {
         customerRepository = mockk(relaxed = true)
 
-        sut = CustomerActivateUseCase(customerRepository = customerRepository)
+        sut = ActivateCustomerUseCase(customerRepository = customerRepository)
     }
 
     @Test
@@ -42,13 +42,15 @@ class CustomerActivateUseCaseTest {
             coEvery { customerRepository.findById(customerId) } returns customer
 
             // when
-            val input = CustomerActivateUseCase.Input(customerId = customerId.toString())
+            val input = ActivateCustomerUseCase.Input(customerId = customerId.toString())
 
             val output = sut.execute(input)
 
             // then
             assertNotNull(output)
             assertEquals(customerId.toString(), output.customerId)
+            assertEquals(customer.name, output.name)
+            assertEquals(customer.email, output.email)
             assertEquals(customer.activeUntil!!.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME), output.activeUntil)
 
             val slot = slot<Customer>()
@@ -68,7 +70,7 @@ class CustomerActivateUseCaseTest {
             coEvery { customerRepository.findById(customerId) } returns null
 
             // when call the use case to activate the customer
-            val input = CustomerActivateUseCase.Input(customerId = customerId.toString())
+            val input = ActivateCustomerUseCase.Input(customerId = customerId.toString())
             val exception = assertThrows<CustomerByIdNotFoundException> { sut.execute(input) }
 
             // then validate if the exception was thrown and the message informs that customer by id does not exist

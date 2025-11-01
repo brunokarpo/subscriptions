@@ -1,5 +1,5 @@
 package nom.brunokarpo.subscriptions.infra.api.customers.dtos
 
-data class ProductSubscriptionDto(
+data class RequestProductSubscriptionDto(
     val productName: String,
 )

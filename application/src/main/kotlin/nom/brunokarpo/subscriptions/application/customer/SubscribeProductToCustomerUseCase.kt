@@ -7,7 +7,6 @@ import nom.brunokarpo.subscriptions.application.usecases.UseCase
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
 import nom.brunokarpo.subscriptions.domain.customer.CustomerRepository
 import nom.brunokarpo.subscriptions.domain.product.ProductRepository
-import java.time.format.DateTimeFormatter
 
 class SubscribeProductToCustomerUseCase(
     private val customerRepository: CustomerRepository,
@@ -19,16 +18,14 @@ class SubscribeProductToCustomerUseCase(
         val customer = customerRepository.findById(customerId) ?: throw CustomerByIdNotFoundException(customerId)
         val product = productRepository.findByName(input.productName) ?: throw ProductNotExistsException(input.productName)
 
-        customer.subscribe(product)
+        val subscription = customer.subscribe(product)
 
         customerRepository.save(customer)
 
-        val activationKey = customer.activationKey()
-
         return Output(
-            email = activationKey.email,
-            products = activationKey.products.toList(),
-            validUntil = activationKey.validUntil.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+            email = customer.email,
+            productName = product.name,
+            subscriptionStatus = subscription.status.name,
         )
     }
 
@@ -39,7 +36,7 @@ class SubscribeProductToCustomerUseCase(
 
     class Output(
         val email: String,
-        val products: List<String>,
-        val validUntil: String,
+        val productName: String,
+        val subscriptionStatus: String,
     )
 }

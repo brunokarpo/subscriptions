@@ -5,7 +5,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerByIdNotFoundException
-import nom.brunokarpo.subscriptions.application.customer.exceptions.CustomerNotExistsException
 import nom.brunokarpo.subscriptions.application.customer.exceptions.ProductNotExistsException
 import nom.brunokarpo.subscriptions.domain.customer.Customer
 import nom.brunokarpo.subscriptions.domain.customer.CustomerId
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import kotlin.test.assertContains
 
 class SubscribeProductToCustomerUseCaseTest {
     private lateinit var customerRepository: CustomerRepository
@@ -51,8 +49,10 @@ class SubscribeProductToCustomerUseCaseTest {
 
             val productName = "Product Name"
             val productId = ProductId.unique()
-            val product = Product.create(productId = productId, name = productName)
+            val product = Product.create(id = productId, name = productName)
             coEvery { productRepository.findByName(productName) } returns product
+
+            val expectedSubscriptionStatus = "REQUESTED"
 
             // when
             val input =
@@ -64,8 +64,8 @@ class SubscribeProductToCustomerUseCaseTest {
 
             // then
             assertEquals(customerEmail, output.email)
-            assertContains(output.products, productName)
-            assertNotNull(output.validUntil)
+            assertEquals(productName, output.productName)
+            assertEquals(expectedSubscriptionStatus, output.subscriptionStatus)
 
             coVerify(exactly = 1) { customerRepository.save(customer) }
         }
@@ -140,7 +140,7 @@ class SubscribeProductToCustomerUseCaseTest {
 
             val productName = "Product Name"
             val productId = ProductId.unique()
-            val product = Product.create(productId = productId, name = productName)
+            val product = Product.create(id = productId, name = productName)
             coEvery { productRepository.findByName(productName) } returns product
 
             // when
